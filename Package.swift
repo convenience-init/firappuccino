@@ -4,25 +4,41 @@
 import PackageDescription
 
 let package = Package(
-    name: "Firappuccino",
-    products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "Firappuccino",
-            targets: ["Firappuccino"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
-        .target(
-            name: "Firappuccino",
-            dependencies: []),
-        .testTarget(
-            name: "FirappuccinoTests",
-            dependencies: ["Firappuccino"]),
-    ]
+	name: "Firappuccino",
+	platforms: [.iOS(.v14), .macOS(.v12), .watchOS(.v7)],
+	products: [
+		
+		.library(
+			name: "Firappuccino",
+			targets: ["Firappuccino"]),
+	],
+	dependencies: [
+		
+		.package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMajor(from: "8.0.0")),
+		.package(url: "https://github.com/google/GTMAppAuth.git", from: "1.0.0"),
+		.package(url: "https://github.com/openid/AppAuth-iOS.git", .upToNextMajor(from: "1.4.0")),
+		.package(url: "https://github.com/Kitura/Swift-JWT.git", .upToNextMajor(from: "3.6.201"))
+	],
+	targets: [
+		
+		.target(
+			name: "Firappuccino",
+			dependencies: [
+				.product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseFirestoreSwift-Beta", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseStorageSwift-Beta", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseAnalytics", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseAnalyticsSwift-Beta", package: "firebase-ios-sdk"),
+				.product(name: "GTMAppAuth", package: "GTMAppAuth"),
+				.product(name: "AppAuth", package: "AppAuth-iOS"),
+				.product(name: "SwiftJWT", package: "Swift-JWT"),
+			]),
+		
+			.testTarget(
+				name: "FirappuccinoTests",
+				dependencies: ["Firappuccino"]),
+	]
 )
