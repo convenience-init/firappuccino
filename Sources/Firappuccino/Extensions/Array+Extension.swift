@@ -1,11 +1,8 @@
-
 infix operator <=
 infix operator -=
 
+
 extension Array where Element: Equatable {
-	
-	// MARK: - Internal Static Methods
-	
 	
 	internal static func <= (lhs: inout Self, rhs: Element) {
 		if !lhs.contains(rhs) {
@@ -26,8 +23,6 @@ extension Array where Element: Equatable {
 	internal static func -= (lhs: inout Self, rhs: [Element]) {
 		lhs.removeAll{ rhs.contains($0) }
 	}
-	
-	// MARK: - Internal Methods
 	
 	internal func chunk(size: Int) -> [Self] {
 		var arr = self

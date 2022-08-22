@@ -1,3 +1,5 @@
+import Foundation
+
 
 extension UUID {
 	var uuidStringSansDashes: String {

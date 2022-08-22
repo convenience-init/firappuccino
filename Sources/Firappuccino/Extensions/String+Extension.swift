@@ -1,15 +1,18 @@
 import CryptoKit
+import Foundation
+
 
 extension String {
-	
-	// MARK: - Public Methods
 	
 	/// The string, reformatted for username format.
 	public var inUsernameFormat: String {
 		return self.replacingOccurrences(of: "[^a-zA-Z0-9_.]", with: "_", options: .regularExpression, range: nil).lowercased()
 	}
 	
-	// MARK: - Internal Static Methods
+	internal static func random(length: Int) -> String {
+		let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		return String((0..<length).map{ _ in letters.randomElement()! })
+	}
 	
 	internal static func nonce(length: Int = 32) -> String {
 		precondition(length > 0)
@@ -39,8 +42,6 @@ extension String {
 		return result
 	}
 	
-	// MARK: - Internal Methods
-	
 	internal func sha256() -> String {
 		let str = self
 		let inputData = Data(str.utf8)
@@ -51,6 +52,7 @@ extension String {
 		
 		return hashString
 	}
+	
 	///see also: - https://developer.apple.com/forums/thread/122005
 	// try! NSRegularExpression(pattern: #"\S*@\S*\s"#, options: []).stringByReplacingMatches(in: "1.2", withTemplate: #"$1"#))
 	internal func getEmailPrefix() throws -> String {
@@ -58,9 +60,9 @@ extension String {
 			return try NSRegularExpression(pattern: #"\S*@\S*\s"#, options: []).stringByReplacingMatches(in: self, withTemplate: "")
 		}
 		catch let error as NSError {
-			Fireplug.log(error: error)
+			Firappuccino.logger.error("\(error.localizedDescription)")
+			return self
 		}
-		return self
 	}
 }
 
