@@ -5,7 +5,7 @@ import FirebaseAuth
 import Logging
 import AuthenticationServices
 
-public class FirappuccinoAuth: NSObject {
+public class FAuth: NSObject {
 	
 	public typealias DefaultURL = String
 	
@@ -27,7 +27,7 @@ public class FirappuccinoAuth: NSObject {
 	
 	internal static let auth = Auth.auth()
 	
-	internal static let listenerKey: Firappuccino.ListenerKey = "FIRAPPUCCINO_USER_CHANGE"
+	internal static let listenerKey: Firappuccino.ListenerKey = "F_USER_CHANGE"
 	
 	internal var currentNonce: String?
 	
@@ -49,7 +49,7 @@ public class FirappuccinoAuth: NSObject {
 		}
 	}
 	
-	/// Signs-in a registered `FirappuccinoUser` using a registered `FirebaseAuth` account and the `Provider.email` `accountProvider`.
+	/// Signs-in a registered `FUser` using a registered `FirebaseAuth` account and the `Provider.email` `accountProvider`.
 	/// - Parameters:
 	///   - email: The user's registered account email address
 	///   - password: The user's account password
@@ -68,7 +68,7 @@ public class FirappuccinoAuth: NSObject {
 		}
 	}
 	
-	/// Signs a `FirappuccinoUser` into a registered `FirebaseAuth` account using the specified credentials.
+	/// Signs a `FUser` into a registered `FirebaseAuth` account using the specified credentials.
 	/// - Parameter credential: The appropriate `AuthCredential` for the desired authorization flow.
 	/// - Note: Do not call this method directly if using "SignIn with Apple" or "Google SignIn" - call the appropriate convenience methods,
 	///
@@ -88,7 +88,7 @@ public class FirappuccinoAuth: NSObject {
 		}
 	}
 	
-	/// Signs the currently logged-in `FirappuccinoUser` out of all services.
+	/// Signs the currently logged-in `FUser` out of all services.
 	public static func signOut() throws {
 		//TODO: - badge count reset
 		
@@ -102,20 +102,20 @@ public class FirappuccinoAuth: NSObject {
 	
 	/// Allows you to specify actions to perform on the user object the user is updated.
 	/// - Parameters:
-	///   - type: The `Type` of your custom `FirappuccinoUser` object or subclass
-	///   - action: A closure containing the actions to perform when the the `FirappuccinoUser` object changes.
-	@MainActor public static func onUserUpdate<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FirappuccinoUser {
+	///   - type: The `Type` of your custom `FUser` object or subclass
+	///   - action: A closure containing the actions to perform when the the `FUser` object changes.
+	@MainActor public static func onUserUpdate<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FUser {
 		if let authHandle = authHandle {
 			auth.removeStateDidChangeListener(authHandle)
 		}
 		authHandle = auth.addStateDidChangeListener { _, user in
 			Task {
-				guard let user = user, let newUser = await T.get(from: user), !newUser.isGuestUser else { return }
+				guard let user = user, let newUser = await T.get(from: user), !newUser.isDummy else { return }
 				Firappuccino.Listen.stop(listenerKey)
-				Firappuccino.Listen.listen(to: newUser.id, ofType: T.self, key: listenerKey) { document in
+				Firappuccino.Listen.`listen`(to: newUser.id, ofType: T.self, key: listenerKey) { document in
 					guard let document = document else {
 						action(newUser)
-						Task {try? await newUser.set()}
+						Task {try? await newUser.`write`()}
 						return
 					}
 					action(document)
@@ -124,27 +124,20 @@ public class FirappuccinoAuth: NSObject {
 		}
 	}
 	
-	/// Checks to see if a username is unique in your `FirappuccinoUser` objects collection in `Firestore`.
+	/// Checks to see if a username is unique in your `FUser` objects collection in `Firestore`.
 	/// - Parameters:
 	///   - username: The username to query for.
 	///   - forUserType: The user `Type` to query against.
 	/// - Returns: A `Bool`, `true` if the passed `username` is unique, `false` otherwise.
-	public static func isUsernameAvailable<T>(_ username: String, forUserType: T.Type) async throws -> Bool where T: FirappuccinoUser {
+	public static func isUsernameAvailable<T>(_ username: String, forUserType: T.Type) async throws -> Bool where T: FUser {
 		let path: KeyPath<T, String> = \.username
-		
-		do {
-			return try await Firappuccino.Queries.queryWhere(path: path, comparison: .equals, value: username).count <= 0
-		}
-		catch let error as NSError {
-			Firappuccino.logger.error( "\(error.localizedDescription)")
-			throw error
-		}
+		return try await Firappuccino.FQuery.wherePath(path, .equals, username).count<=0
 	}
 	
 	/// Prepares GoogleAppAuth
 	internal static func prepare() {
-		GoogleAppAuth.shared.appendAuthorizationRealm(OIDScopeEmail)
-		GoogleAppAuth.shared.retrieveExistingAuthorizationState()
+		GAppAuth.shared.appendAuthorizationRealm(OIDScopeEmail)
+		GAppAuth.shared.retrieveExistingAuthorizationState()
 	}
 	
 	/// Handles the authorization flow for ``Google SignIn``
@@ -157,7 +150,7 @@ public class FirappuccinoAuth: NSObject {
 		}
 		
 		do {
-			try await FirappuccinoAuth.signIn(with: credential)
+			try await FAuth.signIn(with: credential)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -167,7 +160,8 @@ public class FirappuccinoAuth: NSObject {
 	
 	/// Provides a callback to execute code actions when `AuthState` changes.
 	/// - Parameter action: A closure containing the code to execute after this method is called.
-	@MainActor internal static func onAuthChange<T>(perform action: @escaping (T?) -> Void) where T: FirappuccinoUser {
+	@available(*, renamed: "onAuthChange()")
+	@MainActor internal static func onAuthChange<T>(perform action: @escaping (T?) -> Void) where T: FUser {
 		
 		if let authHandle = authHandle {
 			auth.removeStateDidChangeListener(authHandle)
@@ -175,14 +169,23 @@ public class FirappuccinoAuth: NSObject {
 		authHandle = auth.addStateDidChangeListener { _, user in
 			Task {
 				guard let user = user, let newUser = await T.get(from: user) else { return }
-				guard let document = try await Firappuccino.Fetch.get(id: newUser.id, ofType: T.self) else { return try await newUser.set()
+				guard let document = try await Firappuccino.Fetch.`fetch`(id: newUser.id, ofType: T.self) else { return try await newUser.`write`()
 				}
 				action(document)
 			}
 		}
 	}
 	
-	/// Handles the `FirebaseAuth` authentication result
+	@MainActor internal static func onAuthChange<T>() async -> T? where T: FUser {
+		return await withCheckedContinuation { continuation in
+			onAuthChange() { result in
+				continuation.resume(returning: result)
+			}
+		}
+	}
+	
+	
+	/// Handles the `FAuth` authentication result
 	/// - Parameters:
 	///   - authResult: An optional `AuthDataResult` or `nil`
 	///   - error: An optional `Error` or `nil`
@@ -225,7 +228,7 @@ public class FirappuccinoAuth: NSObject {
 }
 
 #if os(iOS)
-extension FirappuccinoAuth {
+extension FAuth {
 	
 	/// ``Google SignIn`` Authentication Flow (iOS)
 	/// - Parameter clientID: The `ClientID` for your project/app
@@ -255,10 +258,10 @@ extension FirappuccinoAuth {
 	private static func getCredential(clientID: String, redirectUri: String) async throws -> AuthCredential? {
 		var credential: AuthCredential?
 		do {
-			try await GoogleAppAuth.shared.authorize(in: UIApplication.shared.windows.first!.rootViewController!, clientID: clientID, redirectUri: redirectUri) { _ in
+			try await GAppAuth.shared.authorize(in: UIApplication.shared.windows.first!.rootViewController!, clientID: clientID, redirectUri: redirectUri) { _ in
 				guard
-					GoogleAppAuth.shared.isAuthorized(),
-					let authorization = GoogleAppAuth.shared.getCurrentAuthorization(),
+					GAppAuth.shared.isAuthorized(),
+					let authorization = GAppAuth.shared.getCurrentAuthorization(),
 					let accessToken = authorization.authState.lastTokenResponse?.accessToken,
 					let idToken = authorization.authState.lastTokenResponse?.idToken
 				else { return }
@@ -277,7 +280,7 @@ extension FirappuccinoAuth {
 import Cocoa
 import AppKit
 
-extension FirappuccinoAuth {
+extension FAuth {
 	
 	/// ``Google SignIn`` Authentication Flow (macOS)
 	/// - Parameters:
@@ -313,10 +316,10 @@ extension FirappuccinoAuth {
 	///In `AppDelegate.swift`, add an Objective-C exposed method ```handleEvent(event:replyEvent:)```:
 	///```
 	///@objc private func handleEvent(event: NSAppleEventDescriptor, replyEvent:NSAppleEventDescriptor) {
-	///FirappuccinoAuth.handle(event: event)
+	///FAuth.handle(event: event)
 	///}
 	///```
-	/// `FirappuccinoAuth` will handle the remaining flow after ```handle(event:)``` is called.
+	/// `FAuth` will handle the remaining flow after ```handle(event:)``` is called.
 	public static func handle(event: NSAppleEventDescriptor) async {
 		let urlString = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue ?? ""
 		let url = URL(string: urlString)!
@@ -343,9 +346,9 @@ extension FirappuccinoAuth {
 }
 #endif
 
-extension FirappuccinoAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
 	
-	private static var shared = FirappuccinoAuth()
+	private static var shared = FAuth()
 	
 	/**
 	 Signs in with Apple.
@@ -364,7 +367,7 @@ extension FirappuccinoAuth: ASAuthorizationControllerDelegate, ASAuthorizationCo
 	 // ...
 	 
 	 SignInWithAppleButton(onRequest: { _ in
-	 FirappuccinoAuth.signInWithApple()
+	 FAuth.signInWithApple()
 	 }, onCompletion: { _ in })
 	 ```
 	 */
@@ -424,7 +427,7 @@ extension FirappuccinoAuth: ASAuthorizationControllerDelegate, ASAuthorizationCo
 			
 			Task {
 				do {
-					try await FirappuccinoAuth.signIn(with: credential)
+					try await FAuth.signIn(with: credential)
 				}
 				catch let error as NSError {
 					Firappuccino.logger.error("\(error.localizedDescription)")

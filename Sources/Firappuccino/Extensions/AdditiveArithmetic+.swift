@@ -1,7 +1,7 @@
 import Foundation
 
 
-internal extension AdditiveArithmetic {
+extension AdditiveArithmetic {
 	mutating func add(_ value: Self) {
 		self += value
 	}

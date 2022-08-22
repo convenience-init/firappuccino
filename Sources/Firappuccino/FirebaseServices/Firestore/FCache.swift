@@ -2,12 +2,12 @@
 extension Firappuccino {
 	
 	/**
-	 The `FirappuccinoCache` lets `Firappuccino` manage the the local cacheing of your objects stored in Firestore.
+	 The `FCache` lets `Firappuccino` manage the the local cacheing of your objects stored in Firestore.
 	 
 	 You can specify whether you'd like to use `Firappuccino`'s cacheing capabilities by setting the static `useCache` property to `true` in your apps `AppDelegate`.
 	 
 	 ````
-	 Firappuccino.useCache = true
+	 Configurator.useCache = true
 	 ````
 	 */
 	public struct LocalCache {
@@ -15,19 +15,19 @@ extension Firappuccino {
 		fileprivate static var caches: [CollectionName: Any] = [:]
 		
 		/**
-		 Registers a `FirappuccinoDocument` to the cache.
+		 Registers a `FDocument` to the cache.
 		 
 		 - parameter document: The document to register.
 		 
-		 If `Firappuccino.useCache` is set to `true`, documents retrieved from Firestore using `Firappuccino.Fetch` are automatically cached.
+		 If `Configurator.useCache` is set to `true`, documents retrieved from Firestore using `Firappuccino.Fetch` are automatically cached.
 		 
-		 To retrieve a cached object, use ```grab(_:fromType:)```.
+		 To retrieve a cached object, use ```cacheFetch(_:fromType:)```.
 		 - note: Registered documents are stored in caches based on their `Type`.
 		 */
-		public static func register<T>(_ document: T) async throws where T: FirappuccinoDocument {
+		public static func register<T>(_ document: T) async throws where T: FDocument {
 			do {
-				async let cache = LocalCache.caches[document.typeName] as! Cache<T>
-				try await cache.register(document)
+				async let cache = LocalCache.caches[document.typeName] as? FCache<T>
+				try await cache?.register(document)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
@@ -35,7 +35,7 @@ extension Firappuccino {
 		}
 		
 		/**
-		 Fetches a cached `Firappuccino` from the cache.
+		 Fetches a object from the cache if it is present.
 		 
 		 - parameter id: The ID of the document to grab.
 		 - parameter type: The document's type.
@@ -45,10 +45,10 @@ extension Firappuccino {
 		 To store a local document, use ```register(_:)```.
 		 - note: Registered documents are stored in caches based on their `Type`.
 		 */
-		public static func grab<T>(_ id: DocumentID, fromType type: T.Type) async throws -> T? where T: FirappuccinoDocument {
+		public static func `cacheFetch`<T>(_ id: DocumentID, fromType type: T.Type) async throws -> T? where T: FDocument {
 			var cached: T? = nil
 			do {
-				async let cache = (LocalCache.caches[colName(of: T.self)] as! Cache<T>).grab(id)
+				async let cache = (LocalCache.caches[colName(of: T.self)] as! FCache<T>).`cacheFetch`(id)
 				if let cache = try await cache {
 					cached = cache
 				}
@@ -63,24 +63,24 @@ extension Firappuccino {
 	/**
 	 A local cache for documents of a specified `Type`.
 	 */
-	public class Cache<T> where T: FirappuccinoDocument {
+	public class FCache<T> where T: FDocument {
 		
 		private var cache: [DocumentID: T] = [:]
 		
 		/// Gets a document with the specified `id` from the cache if it exists.
 		/// - Parameter id: The `DocumentID` of the target document.
-		/// - Returns: An object conforming to `FirappuccinoDocument` or `nil`
-		fileprivate func grab(_ id: DocumentID) async throws -> T? where T: FirappuccinoDocument {
+		/// - Returns: An object conforming to `FDocument` or `nil`
+		fileprivate func `cacheFetch`(_ id: DocumentID) async throws -> T? where T: FDocument {
 			guard let document = cache[id] else { return nil }
-			Firappuccino.logger.info("FirappuccinoDocument successfully retrieved from [\(document.typeName)] cache. ID: \(id)")
+			Firappuccino.logger.info("FDocument successfully retrieved from [\(document.typeName)] cache. ID: \(id)")
 			return cache[id]
 		}
 		
-		/// Registers a remote `FirappuccinoDocument` in the local cache
+		/// Registers a remote `FDocument` in the local cache
 		/// - Parameter document: The document to register.
-		fileprivate func register(_ document: T) async throws where T: FirappuccinoDocument {
+		fileprivate func register(_ document: T) async throws where T: FDocument {
 			cache[document.id] = document
-			Firappuccino.logger.info("FirappuccinoDocument successfully stored in [\(document.typeName)] cache. ID: \(document.id) Size: \(cache.count) object(s)")
+			Firappuccino.logger.info("FDocument successfully stored in [\(document.typeName)] cache. ID: \(document.id) Size: \(cache.count) object(s)")
 		}
 	}
 }

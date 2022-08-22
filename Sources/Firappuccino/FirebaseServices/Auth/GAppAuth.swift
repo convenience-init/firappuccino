@@ -6,7 +6,7 @@ import UIKit
 /// Wrapper class that provides convenient AppAuth functionality with Google Services.
 /// Set `ClientId`, `RedirectUri` and call respective methods where you need them.
 /// Requires dependency to ``GTMAppAuth``, see: https://github.com/google/GTMAppAuth
-public final class GoogleAppAuth: NSObject {
+public final class GAppAuth: NSObject {
 	
 	private static let KeychainPrefix   = Bundle.main.bundleIdentifier!
 	private static let KeychainItemName = KeychainPrefix + "GoogleAuthorization"
@@ -25,11 +25,11 @@ public final class GoogleAppAuth: NSObject {
 	// Used in continueAuthorization(with:callback:) in order to resume the authorization flow after app reentry
 	private var currentAuthorizationFlow: OIDExternalUserAgentSession?
 	
-	private static var singletonInstance: GoogleAppAuth?
+	private static var singletonInstance: GAppAuth?
 	
-	public static var shared: GoogleAppAuth {
+	public static var shared: GAppAuth {
 		if singletonInstance == nil {
-			singletonInstance = GoogleAppAuth()
+			singletonInstance = GAppAuth()
 		}
 		return singletonInstance!
 	}
@@ -134,7 +134,7 @@ public final class GoogleAppAuth: NSObject {
 	
 	/// Loads any existing authorization from the key chain on app start.
 	public func retrieveExistingAuthorizationState() {
-		let keychainItemName = GoogleAppAuth.KeychainItemName
+		let keychainItemName = GAppAuth.KeychainItemName
 		if let authorization = GTMAppAuthFetcherAuthorization(fromKeychainForName: keychainItemName) {
 			setAuthorization(authorization)
 		}
@@ -142,7 +142,7 @@ public final class GoogleAppAuth: NSObject {
 	
 	/// Resets the authorization state and removes any stored information.
 	public func resetAuthorizationState() {
-		GTMAppAuthFetcherAuthorization.removeFromKeychain(forName: GoogleAppAuth.KeychainItemName)
+		GTMAppAuthFetcherAuthorization.removeFromKeychain(forName: GAppAuth.KeychainItemName)
 		// As keychain and cached authorization token are meant to be in sync, we also have to:
 		setAuthorization(nil)
 	}
@@ -169,7 +169,7 @@ public final class GoogleAppAuth: NSObject {
 		// No authorization available which can be saved
 		guard let authorization = authorization else { return }
 		
-		let keychainItemName = GoogleAppAuth.KeychainItemName
+		let keychainItemName = GAppAuth.KeychainItemName
 		if authorization.canAuthorize() {
 			GTMAppAuthFetcherAuthorization.save(authorization, toKeychainForName: keychainItemName)
 		}
@@ -182,7 +182,7 @@ public final class GoogleAppAuth: NSObject {
 	
 }
 
-extension GoogleAppAuth: OIDAuthStateChangeDelegate {
+extension GAppAuth: OIDAuthStateChangeDelegate {
 	
 	public func didChange(_ state: OIDAuthState) {
 		guard self.authorization != nil else { return }
@@ -197,7 +197,7 @@ extension GoogleAppAuth: OIDAuthStateChangeDelegate {
 	
 }
 
-extension GoogleAppAuth: OIDAuthStateErrorDelegate {
+extension GAppAuth: OIDAuthStateErrorDelegate {
 	
 	// Error callback
 	public func authState(_ state: OIDAuthState, didEncounterAuthorizationError error: Error) {

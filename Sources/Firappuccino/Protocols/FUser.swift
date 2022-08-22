@@ -3,7 +3,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import Logging
 
-public protocol FirappuccinoUser: ObservableObject, IndexedFirappuccinoDocument {
+public protocol FUser: NSObjectProtocol, FIndexable {
 	
 	var notifications: [FPNMessage] { get set }
 	
@@ -31,25 +31,25 @@ public protocol FirappuccinoUser: ObservableObject, IndexedFirappuccinoDocument 
 	
 	var dateCreated: Date { get set }
 	
-	var isGuestUser: Bool { get }
+	var isDummy: Bool { get }
 	
 	static var defaultSuggestionGenerator: (String) -> String { get }
 	
 	var authUser: User? { get }
 	
-	static func get(from user: User) async -> Self? where Self: FirappuccinoUser
+	static func get(from user: User) async -> Self? where Self: FUser
 	
-	func updateEmail<T>(to newEmail: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser
+	func updateEmail<T>(to newEmail: String, ofUserType type: T.Type) async throws where T: FUser
 	
-	func safelyUpdateUsername<T>(to newUsername: String, ofType type: T.Type, suggesting suggestionGenerator: @escaping (String) -> String) async throws -> String where T: FirappuccinoUser
+	func safelyUpdateUsername<T>(to newUsername: String, ofType type: T.Type, suggesting suggestionGenerator: @escaping (String) -> String) async throws -> String where T: FUser
 	
-	func unsafelyUpdateUsername<T>(to newUsername: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser
+	func unsafelyUpdateUsername<T>(to newUsername: String, ofUserType type: T.Type) async throws where T: FUser
 	
-	func updateDisplayName<T>(to newName: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser
+	func updateDisplayName<T>(to newName: String, ofUserType type: T.Type) async throws where T: FUser
 	
-	func updatePhoto<T>(with url: URL, ofUserType type: T.Type) async throws where T: FirappuccinoUser
+	func updatePhoto<T>(with url: URL, ofUserType type: T.Type) async throws where T: FUser
 	
-	func updatePhoto<T>(with data: Data, ofUserType type: T.Type, progress: @escaping (Double) -> Void) async throws where T: FirappuccinoUser
+	func updatePhoto<T>(with data: Data, ofUserType type: T.Type, progress: @escaping (Double) -> Void) async throws where T: FUser
 	
 	func updatePasswordTo(newPassword: String) async throws
 	
@@ -59,7 +59,7 @@ public protocol FirappuccinoUser: ObservableObject, IndexedFirappuccinoDocument 
 	
 	func sendPasswordReset() async throws
 	
-	func delete<T>(ofUserType type: T.Type) async throws where T: FirappuccinoUser
+	func delete<T>(ofUserType type: T.Type) async throws where T: FUser
 	
 	func getUniqueUsername(base: String, using generator: @escaping (String) -> String) async throws -> String
 	
@@ -69,8 +69,8 @@ public protocol FirappuccinoUser: ObservableObject, IndexedFirappuccinoDocument 
 }
 
 // Default Implementation
-public extension FirappuccinoUser {
-	init(id: String = "guest_user", dateCreated: Date = Date(), deviceToken: String = "-", lastSignon: Date = Date(), email: String = "guest@firappuccino.xyz", username: String = "guest_user", displayName: String = "guest_user", profileImageURL: String = FirappuccinoAuth.defaultProfileImageURL.absoluteString) {
+public extension FUser {
+	init(id: String = "guest_user", dateCreated: Date = Date(), deviceToken: String = "-", lastSignon: Date = Date(), email: String = "guest@firappuccino.xyz", username: String = "guest_user", displayName: String = "guest_user", profileImageURL: String = FAuth.defaultProfileImageURL.absoluteString) {
 		self.init()
 		self.id = id
 		self.dateCreated = dateCreated
@@ -83,7 +83,7 @@ public extension FirappuccinoUser {
 		self.profileImageURL = profileImageURL
 	}
 	
-	@MainActor static func get(from user: User) async -> Self? where Self: FirappuccinoUser {
+	@MainActor static func get(from user: User) async -> Self? where Self: FUser {
 		guard let email = user.email else { return nil }
 		let newUser = Self()
 		
@@ -99,7 +99,7 @@ public extension FirappuccinoUser {
 				newUser.username += String.random(length: 6 - newUser.username.count)
 			}
 			newUser.displayName = try user.displayName ?? newUser.email.getEmailPrefix()
-			newUser.profileImageURL = user.photoURL?.absoluteString ?? FirappuccinoAuth.defaultProfileImageURL.absoluteString
+			newUser.profileImageURL = user.photoURL?.absoluteString ?? FAuth.defaultProfileImageURL.absoluteString
 			await newUser.updateAnalyticsUserProperties()
 			try await newUser.refreshEmailVerificationStatus()
 			
@@ -118,20 +118,20 @@ public extension FirappuccinoUser {
 	
 	
 	/// Returns true if the user is authenticated, otherwise false.
-	var isGuestUser: Bool {
-		return id == "guest_user"
+	var isDummy: Bool {
+		return id == "dummy"
 	}
 	
 	/**
 	 Updates the current `FIRUser`s email address.
 	 
 	 - parameter newEmail: The new email to update with.
-	 - parameter type: The `FirappuccinoUser` object's Type .
+	 - parameter type: The `FUser` object's Type .
 	 
-	 - note: Updates the email of both the `Firestore User` object and the the custom `FirappuccinoUser` user object.
+	 - note: Updates the email of both the `Firestore User` object and the the custom `FUser` user object.
 	 - throws: An `Error`
 	 */
-	@MainActor func updateEmail<T>(to newEmail: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser {
+	@MainActor func updateEmail<T>(to newEmail: String, ofUserType type: T.Type) async throws where T: FUser {
 		guard assertAuthMatches(), let authUser = authUser else {
 			return Firappuccino.logger.error("Error: Authentication Mismatch.")
 		}
@@ -139,7 +139,7 @@ public extension FirappuccinoUser {
 		do {
 			try await authUser.updateEmail(to: newEmail)
 			email = newEmail
-			try await set(field: "email", using: \.email, ofType: T.self)
+			try await `write`(field: "email", using: \.email, ofType: T.self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error( "\(error.localizedDescription)")
@@ -147,7 +147,7 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates the `FirappuccinoUser`'s username.
+	 Updates the `FUser`'s username.
 	 
 	 - note: This method is *safe*, meaning that it won't update the username if it already exists in your user objects collection.
 	 
@@ -183,9 +183,9 @@ public extension FirappuccinoUser {
 	 - parameter type: The type of the user.
 	 - parameter suggestionGenerator: A function that takes in a username and provides a new, unique username.
 	 */
-	@MainActor func safelyUpdateUsername<T>(to newUsername: String, ofType type: T.Type, suggesting suggestionGenerator: @escaping (String) -> String = defaultSuggestionGenerator) async throws -> String where T: FirappuccinoUser {
+	@MainActor func safelyUpdateUsername<T>(to newUsername: String, ofType type: T.Type, suggesting suggestionGenerator: @escaping (String) -> String = defaultSuggestionGenerator) async throws -> String where T: FUser {
 		var suggestedName: String = ""
-		async let isAvailable = try await FirappuccinoAuth.isUsernameAvailable(newUsername, forUserType: T.self)
+		async let isAvailable = try await FAuth.isUsernameAvailable(newUsername, forUserType: T.self)
 		
 		if try await isAvailable {
 			try await self.unsafelyUpdateUsername(to: newUsername, ofUserType: T.self)
@@ -198,11 +198,11 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates the `FirappuccinoUser`'s `username` property.
+	 Updates the `FUser`'s `username` property.
 	 
 	 - Warning: This method is *unsafe*, meaning that it will update the username regardless of whether the `username` is unique or not.
 	 
-	 If you wish to update the `FirappuccinoUser`'s `username` if it is available and provide a suggested username upon failure, instead impelment
+	 If you wish to update the `FUser`'s `username` if it is available and provide a suggested username upon failure, instead impelment
 	 ````
 	 safelyUpdateUsername(to:ofType:suggesting:)
 	 ````
@@ -210,12 +210,12 @@ public extension FirappuccinoUser {
 	 - parameter newUsername: The username to update to.
 	 - parameter type: The type of the user.
 	 */
-	@MainActor func unsafelyUpdateUsername<T>(to newUsername: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser {
+	@MainActor func unsafelyUpdateUsername<T>(to newUsername: String, ofUserType type: T.Type) async throws where T: FUser {
 		let oldUsername = username
 		self.username = newUsername
 		
 		do {
-			try await set(field: "username", using: \.username, ofType: T.self)
+			try await `write`(field: "username", using: \.username, ofType: T.self)
 		}
 		catch let error as NSError {
 			self.username = oldUsername
@@ -224,19 +224,19 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates the value of the current `FirappuccinoUser`'s `displayName` property.
+	 Updates the value of the current `FUser`'s `displayName` property.
 	 
 	 - parameter newName: The new display name to update with.
 	 - parameter type: The type of the user.
 	 */
-	@MainActor func updateDisplayName<T>(to newName: String, ofUserType type: T.Type) async throws where T: FirappuccinoUser {
+	@MainActor func updateDisplayName<T>(to newName: String, ofUserType type: T.Type) async throws where T: FUser {
 		guard assertAuthMatches(), let authUser = authUser else { return }
 		do {
 			async let changeRequest = authUser.createProfileChangeRequest()
 			await changeRequest.displayName = newName
 			try await changeRequest.commitChanges()
 			self.displayName = newName
-			try await set(field: "displayName", using: \.displayName, ofType: T.self)
+			try await `write`(field: "displayName", using: \.displayName, ofType: T.self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -244,12 +244,12 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates the value of the current `FirappuccinoUser`'s `profileImageURL` property.
+	 Updates the value of the current `FUser`'s `profileImageURL` property.
 	 
 	 - parameter url: The new photo URL to update with.
 	 - parameter type: The type of the user.
 	 */
-	@MainActor func updatePhoto<T>(with url: URL, ofUserType type: T.Type) async throws where T: FirappuccinoUser {
+	@MainActor func updatePhoto<T>(with url: URL, ofUserType type: T.Type) async throws where T: FUser {
 		guard assertAuthMatches(), let authUser = authUser else { return }
 		do {
 			let changeRequest = authUser.createProfileChangeRequest()
@@ -264,13 +264,13 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates profile Image at the current `FirappuccinoUser`'s existing `profileImageURL` with new image data.
+	 Updates profile Image at the current `FUser`'s existing `profileImageURL` with new image data.
 	 
 	 - parameter data: The data of the new photo to update with.
 	 - parameter type: The type of the user.
 	 */
 	
-	@MainActor func updatePhoto<T>(with data: Data, ofUserType type: T.Type, progress: @escaping (Double) -> Void = { _ in }) async throws where T: FirappuccinoUser {
+	@MainActor func updatePhoto<T>(with data: Data, ofUserType type: T.Type, progress: @escaping (Double) -> Void = { _ in }) async throws where T: FUser {
 		guard assertAuthMatches() else { return }
 		let url = await FirappuccinoResourceStore.put(data, to: FirappuccinoStorageResource(id: id, folder: "ProfileImages"), progress: progress)
 		guard let url = url else { return }
@@ -278,7 +278,7 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Updates the current `FirappuccinoUser`'s password.
+	 Updates the current `FUser`'s password.
 	 
 	 - parameter newPassword: The new password to update with.
 	 */
@@ -309,7 +309,7 @@ public extension FirappuccinoUser {
 	}
 	
 	/**
-	 Refreshes the `emailVerified` static property of `FirappuccinoAuth`.
+	 Refreshes the `emailVerified` static property of `FAuth`.
 	 */
 	func refreshEmailVerificationStatus() async throws {
 		guard assertAuthMatches(), let authUser = authUser else { return }
@@ -317,9 +317,9 @@ public extension FirappuccinoUser {
 		do {
 			try await authUser.reload()
 			guard let user = Auth.auth().currentUser else { return }
-			FirappuccinoAuth.emailVerified = user.isEmailVerified
+			FAuth.emailVerified = user.isEmailVerified
 			let id = user.providerData.first?.providerID ?? ""
-			FirappuccinoAuth.accountProvider = FirappuccinoAuth.Provider(provider: id)
+			FAuth.accountProvider = FAuth.Provider(provider: id)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error( "\(error.localizedDescription)")
@@ -349,24 +349,24 @@ public extension FirappuccinoUser {
 	 - parameter type: The type of the user
 	 */
 	
-	@MainActor func delete<T>(ofUserType type: T.Type) async throws where T: FirappuccinoUser {
+	@MainActor func delete<T>(ofUserType type: T.Type) async throws where T: FUser {
 		guard assertAuthMatches(), let authUser = authUser else { return }
-		Firappuccino.Listen.stop(FirappuccinoAuth.listenerKey)
+		Firappuccino.Listen.stop(FAuth.listenerKey)
 		
 		do {
 			try await authUser.delete()
 			try await Firappuccino.Trash.remove(id: self.id, ofType: T.self)
-			try FirappuccinoAuth.signOut()
+			try FAuth.signOut()
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error( "\(error.localizedDescription)")
 		}
 	}
 	
-	//	func delete<T>(ofUserType type: T.Type, completion: @escaping (Error?) -> Void = { _ in }) where T: FirappuccinoUser {
+	//	func delete<T>(ofUserType type: T.Type, completion: @escaping (Error?) -> Void = { _ in }) where T: FUser {
 	//		guard assertAuthMatches() else { return }
 	//		if let authUser = authUser {
-	//			Firappuccino.Listen.stop(FirappuccinoAuth.listenerKey)
+	//			Firappuccino.Listen.stop(FAuth.listenerKey)
 	//			authUser.delete { error in
 	//				if let error = error {
 	//					completion(error)
@@ -374,7 +374,7 @@ public extension FirappuccinoUser {
 	//				}
 	//				Firappuccino.Trash.remove(id: self.id, ofType: T.self, completion: completion)
 	//				DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-	//					try? FirappuccinoAuth.signOut()
+	//					try? FAuth.signOut()
 	//				}
 	//			}
 	//		}
@@ -387,7 +387,7 @@ public extension FirappuccinoUser {
 	func getUniqueUsername(base: String, using generator: @escaping (String) -> String) async throws -> String {
 		let new = generator(base)
 		do {
-			let available = try await FirappuccinoAuth.isUsernameAvailable(new, forUserType: Self.self)
+			let available = try await FAuth.isUsernameAvailable(new, forUserType: Self.self)
 			return available ? new : try await self.getUniqueUsername(base: new, using: generator)
 			
 		}
@@ -397,7 +397,7 @@ public extension FirappuccinoUser {
 		}
 	}
 	
-	/// A method to check the current `FirappuccinoUser` object matches the `Auth.auth().currentUser` by comparing their respective identifiers
+	/// A method to check the current `FUser` object matches the `Auth.auth().currentUser` by comparing their respective identifiers
 	/// - Returns: A `Bool`: `true` if authentication matches, otherwise `false`
 	func assertAuthMatches() -> Bool {
 		guard let id = authUser?.uid else {

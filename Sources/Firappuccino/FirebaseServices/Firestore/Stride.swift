@@ -8,7 +8,7 @@ extension Firappuccino {
 	/**
 	 A service used for increment updates to objects in Firestore.
 	 */
-	public struct Counter {
+	public struct Stride {
 				
 		/**
 		 Increments a value for a particular field in Firestore.
@@ -19,7 +19,7 @@ extension Firappuccino {
 		 - parameter completion: The completion handler.
 		 */
 		
-		public static func increment<T, U>(_ path: KeyPath<T, U>, by amount: Int, in document: T) async throws where T: FirappuccinoDocument, U: AdditiveArithmetic {
+		public static func increment<T, U>(_ path: KeyPath<T, U>, by amount: Int, in document: T) async throws where T: FDocument, U: AdditiveArithmetic {
 			do {
 				let collectionName = String(describing: T.self)
 				try await db.collection(collectionName).document(document.id).updateData([path.string: FieldValue.increment(Int64(amount))])

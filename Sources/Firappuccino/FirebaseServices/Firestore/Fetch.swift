@@ -20,22 +20,22 @@ extension Firappuccino {
 		 Objects retrieved from Firestore are retrieved from collections based on their type.
 		 */
 		
-		public static func get<T>(id: DocumentID, ofType type: T.Type, useCache: Bool = FirappuccinoConfigurator.useCache) async throws -> T? where T: FirappuccinoDocument {
-			if useCache, let cachedDocument = try await LocalCache.grab(id, fromType: type) {
+		public static func `fetch`<T>(id: DocumentID, ofType type: T.Type, useCache: Bool = Configurator.useCache) async throws -> T? where T: FDocument {
+			if useCache, let cachedDocument = try await LocalCache.`cacheFetch`(id, fromType: type) {
 				return cachedDocument
 			}
 			else {
-				return try await `get`(id, collection: colName(of: T.self), type: type)
+				return try await `fetch`(id, collection: colName(of: T.self), type: type)
 			}
 		}
 		
 		/**
-		 Gets a `UniqueFirappuccinoDocument` from the collection of the same name in Firestore.
+		 Fetches a `Individuatable` from the collection of the same name in Firestore.
 		 
 		 */
 		
-		public static func get<T>(uniqueDocument: UniqueFirappuccinoDocumentName, ofType type: T.Type) async throws -> T? where T: UniqueFirappuccinoDocument {
-			return try await get(uniqueDocument, collection: "UniqueDocument", type: type)
+		public static func `fetch`<T>(uniqueDocument: IndividuatableName, ofType type: T.Type) async throws -> T? where T: Individuatable {
+			return try await `fetch`(uniqueDocument, collection: "Individuatable", type: type)
 		}
 		
 		/**
@@ -46,7 +46,7 @@ extension Firappuccino {
 		 - parameter useCache: Whether the cache should be prioritized to grab documents (if they exist).
 		 - parameter onFetch: The fetch handler. When documents are fetched, they'll populate here.
 		 */
-		public static func get<T>(ids: [DocumentID], ofType type: T.Type, useCache: Bool = FirappuccinoConfigurator.useCache) async throws -> [T] where T: FirappuccinoDocument {
+		public static func `fetch`<T>(ids: [DocumentID], ofType type: T.Type, useCache: Bool = Configurator.useCache) async throws -> [T] where T: FDocument {
 			
 			var results: [T] = []
 			guard ids.count > 0 else { return results }
@@ -54,7 +54,7 @@ extension Firappuccino {
 			
 			do {
 				for chunk in await chunks {
-					results <= (try await `get`(chunk: chunk, ofType: type, useCache: useCache))
+					results <= (try await `fetch`(chunk: chunk, ofType: type, useCache: useCache))
 					
 				}
 				return results
@@ -65,21 +65,6 @@ extension Firappuccino {
 			}
 		}
 		
-		//				public static func get<T>(ids: [DocumentID], ofType type: T.Type, useCache: Bool = Firappuccino.useCache, onFetch: @escaping ([T]) -> Void) where T: FirappuccinoDocument {
-		//					guard ids.count > 0 else {
-		//						onFetch([])
-		//						return
-		//					}
-		//					let chunks = ids.chunk(size: 10)
-		//					var results: [T] = []
-		//					for chunk in chunks {
-		//						`get`(chunk: chunk, ofType: type, useCache: useCache) { arr in
-		//							results <= arr
-		//							onFetch(results)
-		//						}
-		//					}
-		//				}
-		
 		/**
 		 Gets an array of documents from Firestore based on a list of `DocumentID`s from some parent document.
 		 
@@ -88,12 +73,12 @@ extension Firappuccino {
 		 - parameter type: The type of documents that are being retrieved.
 		 - parameter useCache: Whether the cache should be prioritized to grab documents (if they exist).
 		 */
-		public static func getChildren<T, U>(from path: KeyPath<U, [DocumentID]>, in parent: U, ofType: T.Type, useCache: Bool = FirappuccinoConfigurator.useCache) async throws -> [T] where T: FirappuccinoDocument, U: FirappuccinoDocument {
+		public static func fetchChildren<T, U>(from path: KeyPath<U, [DocumentID]>, in parent: U, ofType: T.Type, useCache: Bool = Configurator.useCache) async throws -> [T] where T: FDocument, U: FDocument {
 			
 			do {
-				async let childrenIds = try await Firappuccino.getArray(from: parent.id, ofType: U.self, path: path)
+				async let childrenIds = try await Firappuccino.fetchArray(from: parent.id, ofType: U.self, path: path)
 				guard let ids = try await childrenIds else { return [] }
-				async let children = try await `get`(ids: ids, ofType: T.self)
+				async let children = try await `fetch`(ids: ids, ofType: T.self)
 				return try await children
 				
 			}
@@ -102,11 +87,8 @@ extension Firappuccino {
 				throw error
 			}
 		}
-		/*
-		 public static func getChildren<T, U>(from path: KeyPath<U, [DocumentID]>, in parent: U, ofType: T.Type, useCache: Bool = EasyFirebase.useCache, onFetch: @escaping ([T]) -> Void) where T: Document, U: Document {
-				EasyFirestore.getArray(from: parent.id, ofType: T.self, path: path) { ids in
-		 */
-		private static func get<T>(_ id: String, collection: CollectionName, type: T.Type) async throws -> T? where T: FirappuccinoDocument {
+		
+		private static func `fetch`<T>(_ id: String, collection: CollectionName, type: T.Type) async throws -> T? where T: FDocument {
 			do {
 				async let fetchedDocument = try await db.collection(collection).document(id).getDocument().data(as: type)
 				try await LocalCache.register(try await fetchedDocument)
@@ -118,7 +100,7 @@ extension Firappuccino {
 			}
 		}
 		
-		private static func get<T>(chunk: [DocumentID], ofType type: T.Type, useCache: Bool) async throws -> [T] where T: FirappuccinoDocument {
+		private static func `fetch`<T>(chunk: [DocumentID], ofType type: T.Type, useCache: Bool) async throws -> [T] where T: FDocument {
 			var cachedDocuments: [T] = []
 			guard chunk.count > 0, chunk.count <= 10 else { return cachedDocuments }
 			
@@ -126,7 +108,7 @@ extension Firappuccino {
 				var newIDs: [DocumentID] = chunk
 				if useCache {
 					for id in chunk {
-						if let cachedDocument = try await LocalCache.grab(id, fromType: T.self) {
+						if let cachedDocument = try await LocalCache.`cacheFetch`(id, fromType: T.self) {
 							cachedDocuments <= cachedDocument
 							newIDs -= id
 						}

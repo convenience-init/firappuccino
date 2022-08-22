@@ -6,7 +6,7 @@ import os
 
 
 /// A custom Unified LogHandler with an optional global override
-public struct FirappuccinoOSLog: LogHandler {
+public struct FOSLog: LogHandler {
 	
 	// the static properties hold the globally overridden log level (if overridden)
 	internal static let overrideLock = NSLock()
@@ -18,9 +18,9 @@ public struct FirappuccinoOSLog: LogHandler {
 	public var logLevel: Logger.Level {
 		// when we get asked for the log level, we check if it was globally overridden or not
 		get {
-			FirappuccinoOSLog.overrideLock.lock()
-			defer { FirappuccinoOSLog.overrideLock.unlock() }
-			return FirappuccinoOSLog.overrideLogLevel ?? self._logLevel
+			FOSLog.overrideLock.lock()
+			defer { FOSLog.overrideLock.unlock() }
+			return FOSLog.overrideLogLevel ?? self._logLevel
 		}
 		// we set the log level whenever we're asked (note: this might not have an effect if globally
 		// overridden)
@@ -31,9 +31,9 @@ public struct FirappuccinoOSLog: LogHandler {
 	
 	// globally overrides the logger's log level
 	public static func overrideGlobalLogLevel(_ logLevel: Logger.Level) {
-		FirappuccinoOSLog.overrideLock.lock()
-		defer { FirappuccinoOSLog.overrideLock.unlock() }
-		FirappuccinoOSLog.overrideLogLevel = logLevel
+		FOSLog.overrideLock.lock()
+		defer { FOSLog.overrideLock.unlock() }
+		FOSLog.overrideLogLevel = logLevel
 	}
 	
 	public let label: String

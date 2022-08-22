@@ -1,6 +1,5 @@
 import Foundation
 
-
 extension KeyPath {
 	
 	internal var string: String {

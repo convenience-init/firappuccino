@@ -3,7 +3,7 @@ import Firebase
 import Logging
 
 
-public struct FirappuccinoConfigurator {
+public struct Configurator {
 	
 	// Cache
 	public static var useCache: Bool = true
@@ -17,11 +17,12 @@ public struct FirappuccinoConfigurator {
 		else {
 			FirebaseApp.configure()
 		}
-		// Auth
-		FirappuccinoAuth.prepare()
 		
-		// Logging
-		LoggingSystem.bootstrap(FirappuccinoOSLog.init)
-		FirappuccinoOSLog.overrideLogLevel = globalOverrideLogLevel
+		// Auth
+		FAuth.prepare()
+		
+		// Unified Logging
+		LoggingSystem.bootstrap(FOSLog.init)
+		FOSLog.overrideLogLevel = globalOverrideLogLevel
 	}
 }

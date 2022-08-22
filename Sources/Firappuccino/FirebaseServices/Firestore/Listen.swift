@@ -14,43 +14,32 @@ extension Firappuccino {
 		
 		private static var listeners: [ListenerKey: [ListenerRegistration?]] = [:]
 		
-		public static func listen<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey) async throws -> T? where T: FirappuccinoDocument {
-			return try await withCheckedThrowingContinuation { continuation in
-				listen(to: id, ofType: type, key: key) { onUpdate in
-					let listener = db.collection(colName(of: T.self)).document(id).addSnapshotListener { snapshot, _ in
-						
-						guard let snapshot = snapshot, snapshot.exists else {
-							Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but no data could be found.")
-							continuation.resume(returning: nil)
-							return
-						}
-						guard let document = try? snapshot.data(as: T.self) else {
-							Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but couldn't be decoded.")
-							return
-						}
-						continuation.resume(returning: document)
-					}
-					registerListener(listener, key: key)
-				}
+		@available(*, renamed: "listen(to:ofType:key:)")
+		public static func `listen`<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey, onUpdate: @escaping (T?) -> Void) where T: FDocument {
+			Task {
+				let result: T? = await listen(to: id, ofType: type, key: key)
+				onUpdate(result)
 			}
 		}
 		
-		public static func listen<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey, onUpdate: @escaping (T?) -> Void) where T: FirappuccinoDocument {
-			let listener = db.collection(colName(of: T.self)).document(id).addSnapshotListener { snapshot, _ in
-				guard let snapshot = snapshot, snapshot.exists else {
-					Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but no data could be found.")
-					onUpdate(nil)
-					return
+		public static func `listen`<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey) async -> T? where T: FDocument {
+			return await withCheckedContinuation { continuation in
+				let listener = db.collection(colName(of: T.self)).document(id).addSnapshotListener { snapshot, _ in
+					guard let snapshot = snapshot, snapshot.exists else {
+						Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but no data could be found.")
+						continuation.resume(returning: nil)
+						return
+					}
+					var document: T?
+					try? document = snapshot.data(as: T.self)
+					guard let document = document else {
+						Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but couldn't be decoded.")
+						return
+					}
+					continuation.resume(returning: document)
 				}
-				var document: T?
-				try? document = snapshot.data(as: T.self)
-				guard let document = document else {
-					Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but couldn't be decoded.")
-					return
-				}
-				onUpdate(document)
+				registerListener(listener, key: key)
 			}
-			registerListener(listener, key: key)
 		}
 		
 		public static func stop(_ key: ListenerKey) {

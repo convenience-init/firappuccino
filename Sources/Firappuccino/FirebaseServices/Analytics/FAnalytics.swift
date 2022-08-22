@@ -2,28 +2,26 @@ import FirebaseAnalytics
 import FirebaseAnalyticsSwift
 
 
-public typealias FirappuccinoAnalyticsEventKey = String
-public typealias FirappuccinoAnalyticsUserPropertyKey = String
+public typealias FAnalyticsEventKey = String
+public typealias FAnalyticsUserPropertyKey = String
 
 /**
- `FirappuccinoAnalytics` allows you to easily manage and perform the functions of Firebase Analytics.
- 
- `FirappuccinoAnalytics` is divided into `Event` and `User` catagories
- 
- To log an event, you can use `FirappuccinoAnalytics`' static methods:
+ `FAnalytics` allows you to easily manage and perform the functions of Firebase Analytics.
+  
+ To log an event, you can use `FAnalytics` provided static methods:
  
  ```
- FirappuccinoAnalytics.log("post", data: [
+FAnalytics.log("post", data: [
  "title": "PostOne",
  "isDraft": true
  ])
  ```
  
- If you have a model that conforms to `FirappuccinoAnalyticsLoggable`, you can log events using the model itself:
+ If you have a model that conforms to `FAnalyticsLoggable`, you can log events using the model itself:
  
  ```
  let tequila = Liquor(name: "Cuervo", proof: 181)
- FirappuccinoAnalytics.log("liquor_consumed", model: tequila)
+ FAnalytics.log("liquor_consumed", model: tequila)
  ```
  
  Alternatively, you can call the instance method on the loggable model:
@@ -32,11 +30,11 @@ public typealias FirappuccinoAnalyticsUserPropertyKey = String
  beer.log(key: "food_eaten")
  ```
  
- User Properties are automatically updated when a local `FirappuccinoUser` instance is initialized. For more information, see the documentation for ``FirappuccinoUser``'s `analyticsProperties()` method.
+ User Properties are automatically updated when a local `FUser` instance is initialized. For more information, see the documentation for ``FUser``'s `analyticsProperties()` method.
  
- - Remark:  No data collected by `FirappuccinoAnalytics` is linked to a specific user, and no user data are intentionally collected. If you wish to link analytics data to a specific user, call `FirappuccinoAnalytics.setUserId(_:)` first.
+ - Remark:  No data collected by `FAnalytics` is linked to a specific user, and no user data are intentionally collected. If you wish to link analytics data to a specific user, call `FAnalytics.setUserId(_:)` first.
  */
-public struct FirappuccinoAnalytics {
+public struct FAnalytics {
 		
 	/// The timeout duration.
 	///
@@ -57,7 +55,7 @@ public struct FirappuccinoAnalytics {
 	 - parameter key: The key of the event
 	 - parameter model: The model to log.
 	 */
-	public static func log<T>(_ key: FirappuccinoAnalyticsEventKey, model: T) where T: FirappuccinoAnalyticsLoggable {
+	public static func log<T>(_ key: FAnalyticsEventKey, model: T) where T: FAnalyticsLoggable {
 		log(key, data: model.analyticsData)
 	}
 	
@@ -67,7 +65,7 @@ public struct FirappuccinoAnalytics {
 	 - parameter key: The key of the event
 	 - parameter data: Any data associated with the event
 	 */
-	public static func log(_ key: FirappuccinoAnalyticsEventKey, data: [String: Any]? = [:]) {
+	public static func log(_ key: FAnalyticsEventKey, data: [String: Any]? = [:]) {
 		if let lastLog = lastLog {
 			guard lastLog.distance(to: Date()) > timeout else { return }
 		}
@@ -75,7 +73,7 @@ public struct FirappuccinoAnalytics {
 		Analytics.logEvent(key, parameters: data)
 	}
 		
-	internal static func set(_ key: FirappuccinoAnalyticsUserPropertyKey, value: String?) {
+	internal static func `write`(_ key: FAnalyticsUserPropertyKey, value: String?) {
 		Analytics.setUserProperty(value, forName: key)
 	}
 }

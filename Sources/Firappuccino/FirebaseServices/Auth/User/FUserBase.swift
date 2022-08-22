@@ -5,7 +5,7 @@ import FirebaseMessaging
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-open class FirappBaseUser: FirappuccinoUser {
+open class FUserBase: NSObject, FUser {	
 	
 	public var index: Int?
 	
@@ -29,19 +29,19 @@ open class FirappBaseUser: FirappuccinoUser {
 	
 	public var profileImageURL: String?
 	
-	@objc public var username: String
+	public var username: String
 	
-	@objc public var displayName: String
+	public var displayName: String
 	
-	required public init() {
-		id = "guest_user"
+	required public override init() {
+		id = "dummy"
 		dateCreated = Date()
-		deviceToken = "-"
+		deviceToken = ""
 		appVersion = Bundle.versionString
 		lastSignon = Date()
-		email = "guest_user@firappuccino.xyz"
-		username = "guest_user"
-		displayName = "guest_user"
-		profileImageURL = FirappuccinoAuth.defaultProfileImageURL.absoluteString
+		email = ""
+		username = ""
+		displayName = ""
+		profileImageURL = ""
 	}
 }

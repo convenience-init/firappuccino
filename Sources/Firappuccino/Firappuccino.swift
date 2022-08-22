@@ -14,13 +14,13 @@ public struct Firappuccino {
 	/// The `Firestore` Database
 	public static let db = Firestore.firestore()
 	
-	/// Fetches the contents of an `Array` field from a `FirappuccinoDocument` stored in `Firestore`.
+	/// Fetches the contents of an `Array` field from a `FDocument` stored in `Firestore`.
 	/// - Parameters:
-	///   - id: The `DocumentID` of the `FirappuccinoDocument` that contains the target `Array`
-	///   - type: The object `Type` of the target `FirappuccinoDocument`.
-	///   - path: The storage path of the target `FirappuccinoDocument`.
+	///   - id: The `DocumentID` of the `FDocument` that contains the target `Array`
+	///   - type: The object `Type` of the target `FDocument`.
+	///   - path: The storage path of the target `FDocument`.
 	/// - Returns: An `Array` of `DocumentID`s
-	internal static func getArray<T>(from id: DocumentID, ofType type: T.Type, path: KeyPath<T, [DocumentID]>) async throws -> [DocumentID]? where T: FirappuccinoDocument {
+	internal static func fetchArray<T>(from id: DocumentID, ofType type: T.Type, path: KeyPath<T, [DocumentID]>) async throws -> [DocumentID]? where T: FDocument {
 		
 		do {
 			async let result = try await db.collection(colName(of: T.self)).document(id).getDocument()

@@ -38,18 +38,20 @@ public typealias DocumentID = String
  var stupidApeToo = DumbNFT(id: "1", name: "stupidApeToo", price: 150_000)
  
  // Set the price of `stupidApeToo` to 200_000 in ``Firestore``
- stupidApeToo.set(200_000, to: \.price)
+ stupidApeToo.`write`(200_000, to: \.price)
  
  // Fetch the most up-to-date price info for `stupidApeOne`
- if let currentPrice = try await stupidApeOne.get(\.price) {
- print("StupidApeOne will currently set you back \(currentPrice)")
+ do {
+ 	let currentPrice = try await stupidApeOne.`fetch`(\.price)
+ 	print("StupidApeOne will currently set you back \(currentPrice)")
  }
- stupidApeOne.get(\.price) { cal in
- print("Applesauce is \(cal ?? 0) calories!")
+ catch {
+ 	//...
  }
+
  ```
  */
-public protocol FirappuccinoDocument: FirappuccinoDocumentModel, Equatable, Identifiable {
+public protocol FDocument: FModel, Equatable, Identifiable {
 	
 	/// The document's unique identifier.
 	///
@@ -64,25 +66,25 @@ public protocol FirappuccinoDocument: FirappuccinoDocumentModel, Equatable, Iden
 	var dateCreated: Date { get }
 }
 
-extension FirappuccinoDocument {
+extension FDocument {
 	
 	public static func ==(lhs: Self, rhs: Self) -> Bool {
 		return lhs.id == rhs.id
 	}
 }
 
-extension FirappuccinoDocument {
+extension FDocument {
 	
 	/**
 	 Sets the document in Firestore.
 	 
 	 Documents are automatically stored in collections based on their type.
 	 
-	 If the document to be set has the same ID as an existing document in a collection, the old document will be overwritten.
+	 If the document to be `write` has the same ID as an existing document in a collection, the old document will be overwritten.
 	 */
-	public func set() async throws {
+	public func `write`() async throws {
 		do {
-			try await Firappuccino.CloudStore.set(self)
+			try await Firappuccino.FStore.`write`(self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -101,8 +103,8 @@ extension FirappuccinoDocument {
 	///   - field: The name of the field
 	///   - path: The path to th document containing the field
 	///   - ofType: The `Type` of the document to be updated.
-	public func set<T, U>(field: FieldName, using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FirappuccinoDocument, U: Codable {
-		try await Firappuccino.CloudStore.set(field: field, using: path, in: self as! T)
+	public func `write`<T, U>(field: FieldName, using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FDocument, U: Codable {
+		try await Firappuccino.FStore.`write`(field: field, using: path, in: self as! T)
 	}
 	
 	
@@ -111,13 +113,12 @@ extension FirappuccinoDocument {
 	 
 	 - parameter value: The new value.
 	 - parameter path: The path to the field to update.
-	 - parameter completion: The completion handler.
 	 */
-	public mutating func set<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+	public mutating func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
 		self[keyPath: path] = value
-		
+		//FIXME: - refactor out `fieldName`
 		do {
-			try await Firappuccino.CloudStore.set(field: field, with: value, using: path, in: self)
+			try await Firappuccino.FStore.`write`(field: field, with: value, using: path, in: self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -135,13 +136,13 @@ extension FirappuccinoDocument {
 		do {
 			var fieldValue = self[keyPath: path]
 			if let incrementAmount = increment as? Int {
-				try await Firappuccino.Counter.increment(path, by: incrementAmount, in: self)
+				try await Firappuccino.Stride.increment(path, by: incrementAmount, in: self)
 				fieldValue.add(increment)
 				self[keyPath: path] = fieldValue
 			}
 		}
 		catch let error as NSError {
-			Firappuccino.logger.error("[Firappuccino] You can't increment mismatching values! Check the types of values you are providing to increment.")
+			Firappuccino.logger.error("You can't increment mismatching values!")
 			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 		}
@@ -155,27 +156,26 @@ extension FirappuccinoDocument {
 	 
 	 If you don't want to update the entire object, and instead you just want to fetch a particular value, this method may be helpful.
 	 */
-	
-	public func get<T>(_ path: KeyPath<Self, T>) async throws -> T? where T: Codable {
-		guard let document = try await Firappuccino.Fetch.get(id: id, ofType: Self.self) else { return nil }
+	public func `fetch`<T>(_ path: KeyPath<Self, T>) async throws -> T? where T: Codable {
+		guard let document = try await Firappuccino.Fetch.`fetch`(id: id, ofType: Self.self) else { return nil }
 		return document[keyPath: path]
 		
 	}
 	
 	
-	/// Assigns the specified "child" `FirappuccinoDocument`'s ID to a collection of DocumentIDs in a "parent" `FirappuccinoDocument` document in Firestore.
+	/// Assigns the specified "child" `FDocument`'s ID to a collection of DocumentIDs in a "parent" `FDocument` document in Firestore.
 	/// - Parameters:
-	///   - field: The name of the "target" field in the parent `FirappuccinoDocument`.
-	///   - path: The path to the `field` of `DocumentID`s in the parent `FirappuccinoDocument`.
-	///   - parent: The parent `FirappuccinoDocument` containing the field of `DocumentID`s
-	///   - remark: If `draftPosts` is a property of a `FirappuccinoUser` object  instance, calling
+	///   - field: The name of the "target" field in the parent `FDocument`.
+	///   - path: The path to the `field` of `DocumentID`s in the parent `FDocument`.
+	///   - parent: The parent `FDocument` containing the field of `DocumentID`s
+	///   - remark: If `draftPosts` is a property of a `FUser` object  instance, calling
 	///   ```post.assign(to: \.draftPosts, in: user)```
 	///   will add the `post`'s ID to `users`'s `draftPosts`.
 	///  - important: Fields will not be updated locally using this method.
-	public func assign<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FirappuccinoDocument {
+	public func `link`<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		
 		do {
-			try await Firappuccino.Relationship.assign(self, toField: field, using: path, in: parent)
+			try await Firappuccino.Relate.`link`(self, toField: field, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -189,9 +189,9 @@ extension FirappuccinoDocument {
 	///   - field: field description
 	///   - path: path description
 	///   - parent: parent description
-	public func setAssign<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FirappuccinoDocument {
+	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.CloudStore.setAssign(self, toField: field, using: path, in: parent)
+			try await Firappuccino.FStore.writeAndLink(self, toField: field, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -205,9 +205,9 @@ extension FirappuccinoDocument {
 	///   - field: field description
 	///   - path: path description
 	///   - parent: parent description
-	public func unassign<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FirappuccinoDocument {
+	public func unlink<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.Relationship.unassign(self, fromField: field, using: path, in: parent)
+			try await Firappuccino.Relate.`unlink`(self, fromField: field, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

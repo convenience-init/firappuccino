@@ -6,17 +6,17 @@ extension Firappuccino {
 	/**
 	 A service for querying Firestore data.
 	 */
-	public struct Queries {
+	public struct FQuery {
 		
-		public typealias QueryConditionBlock<T, V> = (KeyPath<T, V>, QueryCondition<T, V>.Comparison, V)
+		public typealias QueryConditionBlock<T, U> = (KeyPath<T, U>, QueryCondition<T, U>.Comparison, U)
 		
 		/**
-		 Queries a collection of documents, matching the given condition.
+		 FQuery a collection of documents, matching the given condition.
 		 
-		 Use the `path` argument to specify the collection to query. For instance, if you have a collection of `FirappuccinoUser` objects, and you want to search for users matching the `displayName` of `"Atreyu"`, you can query like so:
+		 Use the `path` argument to specify the collection to query. For instance, if you have a collection of `FUser` objects, and you want to search for users matching the `displayName` of `"Atreyu"`, you can query like so:
 		 
 		 ```
-		 Firappuccino.Queries.`queryWhere`(\MyUser.displayName, .equals, "Atreyu") { users in
+		 Firappuccino.FQuery.`queryWhere`(\MyUser.displayName, .equals, "Atreyu") { users in
 		 // ...
 		 }
 		 ```
@@ -27,29 +27,27 @@ extension Firappuccino {
 		 - parameter order: The way the documents are ordered. This will always order by the field provided in the `path` parameter.
 		 - parameter limit: The maximum amount of documents to query.
 		 */
-		
-		public static func `queryWhere`<T, U>(path: KeyPath<T, U>, comparison: QueryCondition<T, U>.Comparison, value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FirappuccinoDocument {
-			
-			try await `queryWhere`(condition: QueryCondition(path: path, comparison: comparison, value: value), order: order, limit: limit)
+		public static func wherePath<T, U>(_ path: KeyPath<T, U>, _ comparison: QueryCondition<T, U>.Comparison, _ value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
+			await whereCondition(QueryCondition(path: path, comparison: comparison, value: value), order: order, limit: limit)
 		}
 		
 		/**
-		 Queries a collection of documents, matching the given conditions.
+		 FQuery a collection of documents, matching the given conditions.
 		 
 		 Each condition you wish to check is organized in `QueryConditionBlock`s. A `QueryConditionBlock` is equivalent to the tuple `(path, comparison, value)` of types `(KeyPath<_,_>, Comparison, Any)`. You can use this method to query with multiple conditions chained by the logical `AND` operator.
 		 
 		 
 		 ```
-		 let users = try await Firappuccino.Queries.`queryWhere`(
+		 let users = try await Firappuccino.FQuery.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.dateCreated, .lessThan, Date())
 		 )
 		 ```
 		 
-		 - note: If you are passing `order: .ascending` or `order: .descending` as an argument, ensure that your *first* `QueryConditionBlock` constrains the field you want to have ordered. In other words, if you are querying QueryCondition 1 on field `displayName` and QueryCondition 2 on field `dateCreated` (for instance), and if you pass `.ascending` to the `order` parameter, the results will be ordered by `displayName`, ascending.
+		 - note: If you are passing `order: .ascending` or `order: .descending` as an argument, ensure that your *first* `QueryConditionBlock` constrains the field you want to have ordered.
 		 
 		 ````
-		 let users = try await Firappuccino.Queries.`queryWhere`(
+		 let users = try await Firappuccino.FQuery.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.dateCreated, .lessThan, Date()),
 		 order: .ascending, limit: 8
@@ -61,45 +59,47 @@ extension Firappuccino {
 		 - parameter order: The way the documents are ordered. See **Discussion** for more information.
 		 - parameter limit: The maximum amount of documents to query.
 		 */
-		
-		
-		/// Queries a collection of documents, matching the given conditions.
-		/// - Parameters:
-		///   - conditions: The desired query conditions using `QueryConditionBlock`
-		///   - order: The desired sort, value is a case from the `OrderBy` enum.
-		///   - limit: The maximum number if documents to return
-		/// - Returns: A set of documents of the appropriate type `T`
-		public static func `queryWhere`<T, U>(conditions: QueryConditionBlock<T, U> ...,order: OrderBy? = nil,limit: Int? = nil) async throws -> [T] where T: FirappuccinoDocument {
-			
-			return try await `queryWhere`(conditions: conditions.map { QueryCondition(path: $0.0, comparison: $0.1, value: $0.2) }, order: order, limit: limit)
-		}
-		
-		private static func `queryWhere`<T, U>(condition: QueryCondition<T, U>, order: OrderBy?, limit: Int?) async throws -> [T] where T: FirappuccinoDocument {
-			
-			return try await `queryWhere`(conditions: [condition], order: order, limit: limit)
-		}
-		
-		private static func `queryWhere`<T, U>(conditions: [QueryCondition<T, U>], order: OrderBy?, limit: Int?) async throws -> [T] where T: FirappuccinoDocument {
-			
-			do {
-				let collectionName = String(describing: T.self)
-				let collection = db.collection(collectionName)
-				guard conditions.count > 0 else { return [] }
-				var query: Query = conditions.first!.apply(to: collection)
-				for condition in conditions.dropFirst() {
-					query = condition.apply(to: query)
-				}
-				if let order = order {
-					query = query.order(by: conditions.first!.path.string, descending: order == .descending ? true : false)
-				}
-				
-				if let limit = limit {
-					query = query.limit(to: limit)
-				}
-				
-				return try await query.getDocuments().documents.map { try $0.data(as: T.self) }
+		public static func `whereConditions`<T, U>(_ conditions: QueryConditionBlock<T, U> ..., order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
+			var conditionsArr: [QueryCondition<T, U>] = []
+			for condition in conditions {
+				conditionsArr.append(QueryCondition(path: condition.0, comparison: condition.1, value: condition.2))
 			}
-			catch let error as NSError {
+			return await `whereConditions`(conditionsArr, order: order, limit: limit)
+		}
+
+		private static func whereCondition<T, U>(_ condition: QueryCondition<T, U>, order: OrderBy?, limit: Int?) async -> [T] where T: FDocument {
+			await `whereConditions`([condition], order: order, limit: limit)
+		}
+
+		private static func `whereConditions`<T, U>(_ conditions: [QueryCondition<T, U>], order: OrderBy?, limit: Int?) async -> [T] where T: FDocument {
+			let collectionName = String(describing: T.self)
+			let collection1 = db.collection(collectionName)
+			guard conditions.count > 0 else { return [] }
+			var query: Query = conditions.first!.`apply`(to: collection1)
+			for condition in conditions.dropFirst() {
+				query = condition.`apply`(to: query)
+			}
+			if let order = order {
+				if order == .ascending {
+					query = query.order(by: conditions.first!.path.string)
+				} else if order == .descending {
+					query = query.order(by: conditions.first!.path.string, descending: true)
+				}
+			}
+			if let limit = limit {
+				query = query.limit(to: limit)
+			}
+			do {
+				let snapshot = try await query.getDocuments()
+				var arr: [T] = []
+				for document in snapshot.documents {
+					let object = try? document.data(as: T.self)
+					if let object = object {
+						arr.append(object)
+					}
+				}
+				return arr
+			} catch let error {
 				Firappuccino.logger.error("\(error.localizedDescription)")
 				return []
 			}
@@ -109,14 +109,14 @@ extension Firappuccino {
 			case ascending, descending
 		}
 		
-		public struct QueryCondition<T, V> {
+		public struct QueryCondition<T, U> {
 			
 			/// The path of the field to query.
-			public var path: KeyPath<T, V>
+			public var path: KeyPath<T, U>
 			/// The comparison used to filter a query.
 			public var comparison: Comparison
 			/// The value to check.
-			public var value: V
+			public var value: U
 			
 			
 			internal func apply(to reference: CollectionReference) -> Query {

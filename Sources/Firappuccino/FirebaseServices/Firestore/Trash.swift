@@ -19,7 +19,7 @@ extension Firappuccino {
 		 - parameter completion: The completion handler.
 		 */
 		
-		@MainActor public static func remove<T>(id: DocumentID, ofType type: T.Type) async throws where T: FirappuccinoDocument {
+		@MainActor public static func remove<T>(id: DocumentID, ofType type: T.Type) async throws where T: FDocument {
 			do {
 				let collectionName = String(describing: T.self)
 				try await db.collection(collectionName).document(id).delete()
@@ -39,7 +39,7 @@ extension Firappuccino {
 		 - parameter completion: The completion handler.
 		 */
 		
-		@MainActor public static func remove<T>(_ document: T) async throws where T: FirappuccinoDocument {
+		@MainActor public static func remove<T>(_ document: T) async throws where T: FDocument {
 			do {
 				try await remove(id: document.id, ofType: T.self)
 			}
@@ -52,18 +52,18 @@ extension Firappuccino {
 		/**
 		 Unassigns the document from a parent in Firestore, then removes the document from its collection in Firestore.
 		 
-		 - parameter document: The document to unassign and remove.
+		 - parameter document: The document to unlink and remove.
 		 - parameter path: The path of the parent document's field containing the list of `DocumentID`s.
 		 - parameter parent: The parent document containing the list of `DocumentID`s.
 		 - parameter completion: The completion handler.
 		 
-		 For more information on unassignment, check out `Firappuccino.Relationship`.
+		 For more information on unassignment, check out `Firappuccino.Relate`.
 		 */
 		
-		@MainActor public static func unassignThenRemove<T, U>(_ document: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FirappuccinoDocument, U: FirappuccinoDocument {
+		@MainActor public static func unassignThenRemove<T, U>(_ document: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			
 			do {
-				try await Relationship.unassign(document, fromField: field, using: path, in: parent)
+				try await Relate.`unlink`(document, fromField: field, using: path, in: parent)
 				try await remove(document)
 			}
 			catch let error as NSError {

@@ -38,7 +38,6 @@ let package = Package(
 				.product(name: "SwiftJWT", package: "Swift-JWT"),
 				.product(name: "Logging", package: "swift-log"),
 			]),
-		
 			.testTarget(
 				name: "FirappuccinoTests",
 				dependencies: ["Firappuccino"]),
