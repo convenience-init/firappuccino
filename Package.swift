@@ -17,7 +17,8 @@ let package = Package(
 		.package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMajor(from: "8.0.0")),
 		.package(url: "https://github.com/google/GTMAppAuth.git", from: "1.0.0"),
 		.package(url: "https://github.com/openid/AppAuth-iOS.git", .upToNextMajor(from: "1.4.0")),
-		.package(url: "https://github.com/Kitura/Swift-JWT.git", .upToNextMajor(from: "3.6.201"))
+		.package(url: "https://github.com/Kitura/Swift-JWT.git", .upToNextMajor(from: "3.6.201")),
+		.package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
 	],
 	targets: [
 		
@@ -35,6 +36,7 @@ let package = Package(
 				.product(name: "GTMAppAuth", package: "GTMAppAuth"),
 				.product(name: "AppAuth", package: "AppAuth-iOS"),
 				.product(name: "SwiftJWT", package: "Swift-JWT"),
+				.product(name: "Logging", package: "swift-log"),
 			]),
 		
 			.testTarget(
