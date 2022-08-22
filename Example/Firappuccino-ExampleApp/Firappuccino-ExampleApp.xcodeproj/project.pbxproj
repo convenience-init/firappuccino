@@ -14,6 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DC32284728B4286A0099F6BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DC6357F928B06714002D53FB /* Firappuccino-ExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firappuccino-ExampleApp.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC6357FC28B06714002D53FB /* Firappuccino_ExampleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firappuccino_ExampleAppApp.swift; sourceTree = "<group>"; };
 		DC6357FE28B06714002D53FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,6 +52,7 @@
 		DC6357FB28B06714002D53FB /* Firappuccino-ExampleApp */ = {
 			isa = PBXGroup;
 			children = (
+				DC32284728B4286A0099F6BE /* Info.plist */,
 				DC6357FC28B06714002D53FB /* Firappuccino_ExampleAppApp.swift */,
 				DC6357FE28B06714002D53FB /* ContentView.swift */,
 				DC63580028B06716002D53FB /* Assets.xcassets */,
@@ -270,6 +272,7 @@
 				DEVELOPMENT_TEAM = HSRQC9N69B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Firappuccino-ExampleApp/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +302,7 @@
 				DEVELOPMENT_TEAM = HSRQC9N69B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Firappuccino-ExampleApp/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
