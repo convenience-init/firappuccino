@@ -86,15 +86,15 @@ public struct FPNMessaging {
 	}
 	
 	
-	/// Triggers the send of a FPNMessage Payload to the specified `FirappuccinoUser`
+	/// Triggers the send of a FPNMessage Payload to the specified `FUser`
 	/// - Parameters:
-	///   - sender: The `FirappuccinoUser` whose in-app action triggered the send.
+	///   - sender: The `FUser` whose in-app action triggered the send.
 	///   - recipient: The intended recipient of the `FPNMessage`
 	///   - messageBody: The body of the `FPNMessage`
 	///   - attachmentImageURL: The `URL` for an optional image attachment
 	///   - additionalInfo: Additional descriptive info to include in the `FPNMessage`
 	///   - throws: An `NSError`
-	public static func sendUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FirappuccinoUser, U: FirappuccinoUser {
+	public static func sendUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
 		
 		do {
 			//FIXME: - Use a category enum and an `allCases` computed property
@@ -107,13 +107,13 @@ public struct FPNMessaging {
 		}
 	}
 	
-	/// Handles the preparation, authentication and sending of the `FPNMessage` to the specified `FirappuccinoUser` via Firebase REST API.
+	/// Handles the preparation, authentication and sending of the `FPNMessage` to the specified `FUser` via Firebase REST API.
 	/// - Parameters:
-	///   - message: The `FPNMessage` to send to the recipient `FirappuccinoUser`.
-	///   - user: The `FirappuccinoUser` to receive the push `FPNMessage`.
+	///   - message: The `FPNMessage` to send to the recipient `FUser`.
+	///   - user: The `FUser` to receive the push `FPNMessage`.
 	/// - Throws: An `NSError`
 	/// - Note: This will not add a `FPNMessage` object to the user's `FirebaseMessaging` notification list.
-	private static func sendUserActionMessagingNotification<T>(message: FPNMessage, to recipient: T, withData messageData: [AnyHashable: Any]) async throws where T: FirappuccinoUser {
+	private static func sendUserActionMessagingNotification<T>(message: FPNMessage, to recipient: T, withData messageData: [AnyHashable: Any]) async throws where T: FUser {
 		
 		async let jwt = try await createMessagingJWT()
 		
@@ -221,14 +221,14 @@ public struct FPNMessaging {
 	
 	/// Sends a `POST` request to `FirebaseMessaging` REST API to trigger the notification send
 	/// - Parameters:
-	///   - recipient: The `FirappuccinoUser` who is the recipient of the notification
+	///   - recipient: The `FUser` who is the recipient of the notification
 	///   - title: The title of the notification
 	///   - body: The body of the notification
 	///   - bearerToken: The `bearerToken` to authenticate the `POST` request
 	///   - data: The supplemental data to send with the notification, i.e.
 	///   ````["count": user.notifications.filter({ !$0.read }).count]````
 	/// - Throws: An `NSError`
-	private static func sendNotificationTo<T>(_ recipient: T, title: String = "", body: String, imageURL: String?, bearerToken: String, data: [AnyHashable: Any] = [:]) async throws where T: FirappuccinoUser {
+	private static func sendNotificationTo<T>(_ recipient: T, title: String = "", body: String, imageURL: String?, bearerToken: String, data: [AnyHashable: Any] = [:]) async throws where T: FUser {
 		
 		guard let deviceToken = recipient.deviceToken else {
 			Firappuccino.logger.critical("Your user does not have a device token.")

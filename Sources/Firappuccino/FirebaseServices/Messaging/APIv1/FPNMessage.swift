@@ -12,19 +12,19 @@
 public typealias FPNMessageCategory = String
 
 
-/// A Notification sent from one `FirappuccinoUser` to another which can be programatically triggered by any event from within your app.
+/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app.
 ///
-/// "*FirappuccinoUser X* liked your content *XXX*!"
+/// "*FUser X* liked your content *XXX*!"
 ///
-/// "*FirappuccinoUser X* reported your post *XXX*!"
+/// "*FUser X* reported your post *XXX*!"
 ///
-/// "*FirappuccinoUser X* responded to your question *XXX*!"
+/// "*FUser X* responded to your question *XXX*!"
 ///
 /// - Remark: If you want to send a message with just a title and a body to a user, call
 ///	````
 ///	FPNMessaging.sendNotificationTo<T>(to:title:body:data:)
 ///	````
-public class FPNMessage: FirappuccinoDocumentModel {
+public class FPNMessage: FModel {
 	
 	/// The date of the notification.
 	public var date: Date = Date()
@@ -62,7 +62,7 @@ public class FPNMessage: FirappuccinoDocumentModel {
 	/// Whether the notification has been read
 	public var read: Bool = false
 	
-	public init<T>(_ title: String = "", messageBody: String, sender sendingUser: T, category: FPNMessageCategory, imageFromURL: String? = nil, additionalInfo: String? = nil) where T: FirappuccinoUser {
+	public init<T>(_ title: String = "", messageBody: String, sender sendingUser: T, category: FPNMessageCategory, imageFromURL: String? = nil, additionalInfo: String? = nil) where T: FUser {
 		self.title = title
 		self.user = sendingUser.id
 		self.messageBody = messageBody
