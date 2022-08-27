@@ -63,7 +63,7 @@ extension Firappuccino {
 		@MainActor public static func unassignThenRemove<T, U>(_ document: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			
 			do {
-				try await Relate.`unlink`(document, fromField: field, using: path, in: parent)
+				try await Relate.`unlink`(document, using: path, in: parent)
 				try await remove(document)
 			}
 			catch let error as NSError {

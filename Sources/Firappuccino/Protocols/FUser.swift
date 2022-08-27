@@ -29,7 +29,7 @@ public protocol FUser: NSObjectProtocol, FIndexable {
 	
 	var id: String { get set }
 	
-	var dateCreated: Date { get set }
+	var createdAt: Date { get set }
 	
 	var isDummy: Bool { get }
 	
@@ -37,7 +37,7 @@ public protocol FUser: NSObjectProtocol, FIndexable {
 	
 	var authUser: User? { get }
 	
-	static func get(from user: User) async -> Self? where Self: FUser
+	static func get(from user: User) -> Self? where Self: FUser
 	
 	func updateEmail<T>(to newEmail: String, ofUserType type: T.Type) async throws where T: FUser
 	
@@ -70,10 +70,10 @@ public protocol FUser: NSObjectProtocol, FIndexable {
 
 // Default Implementation
 public extension FUser {
-	init(id: String = "guest_user", dateCreated: Date = Date(), deviceToken: String = "-", lastSignon: Date = Date(), email: String = "guest@firappuccino.xyz", username: String = "guest_user", displayName: String = "guest_user", profileImageURL: String = FAuth.defaultProfileImageURL.absoluteString) {
+	init(id: String = "dummy", dateCreated: Date = Date(), deviceToken: String = "", lastSignon: Date = Date(), email: String = "", username: String = "", displayName: String = "", profileImageURL: String = FAuth.defaultProfileImageURL.absoluteString) {
 		self.init()
 		self.id = id
-		self.dateCreated = dateCreated
+		self.createdAt = dateCreated
 		self.deviceToken = deviceToken
 		self.appVersion = Bundle.versionString
 		self.lastSignon = lastSignon
@@ -83,13 +83,13 @@ public extension FUser {
 		self.profileImageURL = profileImageURL
 	}
 	
-	@MainActor static func get(from user: User) async -> Self? where Self: FUser {
+	@MainActor static func get(from user: User) -> Self? where Self: FUser {
 		guard let email = user.email else { return nil }
 		let newUser = Self()
 		
 		do {
 			newUser.id = user.uid
-			newUser.dateCreated = Date()
+			newUser.createdAt = Date()
 			newUser.deviceToken = FPNMessaging.deviceToken
 			newUser.appVersion = Bundle.versionString
 			newUser.lastSignon = Date()
@@ -100,9 +100,10 @@ public extension FUser {
 			}
 			newUser.displayName = try user.displayName ?? newUser.email.getEmailPrefix()
 			newUser.profileImageURL = user.photoURL?.absoluteString ?? FAuth.defaultProfileImageURL.absoluteString
+			Task {
 			await newUser.updateAnalyticsUserProperties()
 			try await newUser.refreshEmailVerificationStatus()
-			
+			}
 		}
 		catch {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -139,7 +140,7 @@ public extension FUser {
 		do {
 			try await authUser.updateEmail(to: newEmail)
 			email = newEmail
-			try await `write`(field: "email", using: \.email, ofType: T.self)
+			try await `write`(using: \.email, ofType: T.self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error( "\(error.localizedDescription)")
@@ -215,7 +216,7 @@ public extension FUser {
 		self.username = newUsername
 		
 		do {
-			try await `write`(field: "username", using: \.username, ofType: T.self)
+			try await `write`(using: \.username, ofType: T.self)
 		}
 		catch let error as NSError {
 			self.username = oldUsername
@@ -236,7 +237,7 @@ public extension FUser {
 			await changeRequest.displayName = newName
 			try await changeRequest.commitChanges()
 			self.displayName = newName
-			try await `write`(field: "displayName", using: \.displayName, ofType: T.self)
+			try await `write`(using: \.displayName, ofType: T.self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

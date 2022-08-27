@@ -12,10 +12,20 @@ extension Firappuccino {
 		///   - field: The name of the field in the parent document.
 		///   - path: The path of the parent document's field containing the list of `DocumentID`s.
 		///   - parent: The parent document containing the list of `DocumentID`s.
-		public static func `link`<T, U>(_ child: T, toField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
-			//FIXME: - refactor out `fieldName`
+//		public static func `link`<T, U>(_ child: T, toField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+//			//FIXME: - refactor out `fieldName`
+//			do {
+//				try await append(child.id, field: field, using: path, in: parent)
+//			}
+//			catch let error as NSError {
+//				Firappuccino.logger.error("\(error.localizedDescription)")
+//				throw error
+//			}
+//		}
+		
+		public static func `link`<T, U>(_ child: T, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			do {
-				try await append(child.id, field: field, using: path, in: parent)
+				try await append(child.id, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
@@ -32,11 +42,22 @@ extension Firappuccino {
 		 - parameter completion: The completion handler.
 		 */
 		
-		public static func `unlink`<T, U>(_ child: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
-			//FIXME: - refactor out `fieldName`
+//		public static func `unlink`<T, U>(_ child: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+//			//FIXME: - refactor out `fieldName`
+//
+//			do {
+//				try await unappend(child.id, field: field, using: path, in: parent)
+//			}
+//			catch let error as NSError {
+//				Firappuccino.logger.error("\(error.localizedDescription)")
+//				throw error
+//			}
+//		}
+		
+		public static func `unlink`<T, U>(_ child: T, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 
 			do {
-				try await unappend(child.id, field: field, using: path, in: parent)
+				try await unappend(child.id, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
@@ -44,13 +65,27 @@ extension Firappuccino {
 			}
 		}
 		
-		private static func append<T>(_ id: DocumentID, field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
-			//FIXME: - refactor out `fieldName`
+//		private static func append<T>(_ id: DocumentID, field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//			//FIXME: - refactor out `fieldName`
+//
+//			do {
+//				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path)  else { throw RelationError.noParentArray }
+//				array <= id
+//				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+//			}
+//			catch let error as NSError {
+//				Firappuccino.logger.error("\(RelationError.noParentArray)")
+//				Firappuccino.logger.error("\(error.localizedDescription)")
+//				throw error
+//			}
+//		}
+		
+		private static func append<T>(_ id: DocumentID, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 
 			do {
-				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path)  else { throw RelationError.noParentArray }
+				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path) else { throw RelationError.noParentArray }
 				array <= id
-				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+				try await FStore.`write`(value: array, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(RelationError.noParentArray)")
@@ -59,13 +94,26 @@ extension Firappuccino {
 			}
 		}
 		
-		private static func unappend<T>(_ id: DocumentID, field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//		private static func unappend<T>(_ id: DocumentID, field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//			//FIXME: - refactor out `fieldName`
+//			do {
+//				async let array = try await fetchArray(from: id, ofType: T.self, path: path)
+//				guard var array = try await array else { throw RelationError.noParentArray }
+//				array -= id
+//				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+//			}
+//			catch let error as NSError {
+//				Firappuccino.logger.error("\(error.localizedDescription)")
+//				throw error
+//			}
+//		}
+		private static func unappend<T>(_ id: DocumentID, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 			//FIXME: - refactor out `fieldName`
 			do {
 				async let array = try await fetchArray(from: id, ofType: T.self, path: path)
 				guard var array = try await array else { throw RelationError.noParentArray }
 				array -= id
-				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+				try await FStore.`write`(value: array, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")

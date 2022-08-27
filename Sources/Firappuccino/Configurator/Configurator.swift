@@ -8,6 +8,12 @@ public struct Configurator {
 	// Cache
 	public static var useCache: Bool = true
 	
+	// Legacy Cloud Messaging API
+	public static var useLegacyMessaging = false
+	public static var legacyMessagingAPIKey = ""
+	
+	// Logging Level
+	
 	//Configurator
 	@MainActor public static func configurate(WithOptions: FirebaseOptions? = nil, globalOverrideLogLevel: Logger.Level? = nil) {
 		// FirebaseApp
@@ -24,5 +30,12 @@ public struct Configurator {
 		// Unified Logging
 		LoggingSystem.bootstrap(FOSLog.init)
 		FOSLog.overrideLogLevel = globalOverrideLogLevel
+		
+		//Legacy Messaging
+			/*
+			 
+			 let pushManager = LegacyPushNotificationManager(userID: "cyJCfb195ZhJtFzU47OcMC3ezNC3")
+			 pushManager.registerForPushNotifications()
+			 */		
 	}
 }

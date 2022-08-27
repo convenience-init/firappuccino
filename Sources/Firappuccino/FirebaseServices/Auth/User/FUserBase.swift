@@ -11,7 +11,7 @@ open class FUserBase: NSObject, FUser {
 	
 	public var id: String
 	
-	public var dateCreated: Date
+	public var createdAt: Date
 	
 	public var notifications: [FPNMessage] = []
 	
@@ -35,7 +35,7 @@ open class FUserBase: NSObject, FUser {
 	
 	required public override init() {
 		id = "dummy"
-		dateCreated = Date()
+		createdAt = Date()
 		deviceToken = ""
 		appVersion = Bundle.versionString
 		lastSignon = Date()

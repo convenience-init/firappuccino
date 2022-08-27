@@ -1,6 +1,5 @@
 import Foundation
 
-
 public extension UUID {
 	var uuidStringSansDashes: String {
 		get {

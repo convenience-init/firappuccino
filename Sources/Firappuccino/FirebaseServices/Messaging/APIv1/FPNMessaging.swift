@@ -140,13 +140,13 @@ public struct FPNMessaging {
 				}
 			}
 			catch let error as NSError {
-				Firappuccino.logger.error("\(error.localizedDescription)")
-				return
+				return Firappuccino.logger.error("\(error.localizedDescription)")
+				
 			}
 			
 			guard !recipient.disabledMessageCategories.contains(message.category) else {
-				Firappuccino.logger.warning("Message not sent because the user has the message category '`\(message.category)' disabled.")
-				return
+				return Firappuccino.logger.warning("Message not sent because the user has disabled the '`\(message.category)' category.")
+				
 			}
 			
 			Task {
@@ -231,8 +231,7 @@ public struct FPNMessaging {
 	private static func sendNotificationTo<T>(_ recipient: T, title: String = "", body: String, imageURL: String?, bearerToken: String, data: [AnyHashable: Any] = [:]) async throws where T: FUser {
 		
 		guard let deviceToken = recipient.deviceToken else {
-			Firappuccino.logger.critical("Your user does not have a device token.")
-			return
+			return Firappuccino.logger.critical("No device token found for user \(recipient)")
 		}
 		
 		var postData: Data
@@ -290,6 +289,6 @@ public struct FPNMessaging {
 			}
 		}
 		dataTask.resume()
-		Firappuccino.logger.info("Message sending! Title: '\(title)'")
+		Firappuccino.logger.info("Message '\(title)' sent!")
 	}
 }

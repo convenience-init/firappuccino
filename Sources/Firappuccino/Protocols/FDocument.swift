@@ -7,13 +7,13 @@ public typealias DocumentID = String
  
  Adopt the `FirappuccinoDocument` protocol to send your own custom data objects.
  
- All documents must have `id`, `dateCreated` properties, as well as a way to check for equality:
+ All documents must have `id`, `createdAt` properties, as well as a way to check for equality:
  
  ```swift
  class Post: FirappuccinoDocument {
  
  var id: String
- var dateCreated: Date = Date()
+ var createdAt: Date = Date()
  
  var title: String
  var body: String
@@ -63,7 +63,7 @@ public protocol FDocument: FModel, Equatable, Identifiable {
 	/// The date the document was created.
 	///
 	/// This field is assigned manually. It's recommended to assign a new `Date()` instance.
-	var dateCreated: Date { get }
+	var createdAt: Date { get }
 }
 
 extension FDocument {
@@ -80,7 +80,7 @@ extension FDocument {
 	 
 	 Documents are automatically stored in collections based on their type.
 	 
-	 If the document to be `write` has the same ID as an existing document in a collection, the old document will be overwritten.
+	 If the document to be `written` has the same ID as an existing document in a collection, the old document will be overwritten.
 	 */
 	public func `write`() async throws {
 		do {
@@ -101,10 +101,10 @@ extension FDocument {
 	/// Sets a specific field of a document remotely in Firestore.
 	/// - Parameters:
 	///   - field: The name of the field
-	///   - path: The path to th document containing the field
+	///   - path: The path to the document containing the field
 	///   - ofType: The `Type` of the document to be updated.
-	public func `write`<T, U>(field: FieldName, using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FDocument, U: Codable {
-		try await Firappuccino.FStore.`write`(field: field, using: path, in: self as! T)
+	public func `write`<T, U>(using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FDocument, U: Codable {
+		try await Firappuccino.FStore.`write`(to: path, in: self as! T)
 	}
 	
 	
@@ -114,17 +114,26 @@ extension FDocument {
 	 - parameter value: The new value.
 	 - parameter path: The path to the field to update.
 	 */
-	public mutating func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+//	public mutating func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+//		self[keyPath: path] = value
+//		//FIXME: - refactor out `fieldName`
+//		do {
+//			try await Firappuccino.FStore.`write`(field: field, with: value, using: path, in: self)
+//		}
+//		catch let error as NSError {
+//			Firappuccino.logger.error("\(error.localizedDescription)")
+//		}
+//	}
+	public mutating func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
 		self[keyPath: path] = value
 		//FIXME: - refactor out `fieldName`
 		do {
-			try await Firappuccino.FStore.`write`(field: field, with: value, using: path, in: self)
+			try await Firappuccino.FStore.`write`(value: value, using: path, in: self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
 		}
 	}
-	
 	/**
 	 Increments a specific field remotely in Firestore.
 	 
@@ -175,7 +184,7 @@ extension FDocument {
 	public func `link`<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		
 		do {
-			try await Firappuccino.Relate.`link`(self, toField: field, using: path, in: parent)
+			try await Firappuccino.Relate.`link`(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -191,7 +200,7 @@ extension FDocument {
 	///   - parent: parent description
 	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.FStore.writeAndLink(self, toField: field, using: path, in: parent)
+			try await Firappuccino.FStore.writeAndLink(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -207,7 +216,7 @@ extension FDocument {
 	///   - parent: parent description
 	public func unlink<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.Relate.`unlink`(self, fromField: field, using: path, in: parent)
+			try await Firappuccino.Relate.`unlink`(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

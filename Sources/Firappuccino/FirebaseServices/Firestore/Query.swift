@@ -40,7 +40,7 @@ extension Firappuccino {
 		 ```
 		 let users = try await Firappuccino.FQuery.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
-		 (\MyFirappuccinoUser.dateCreated, .lessThan, Date())
+		 (\MyFirappuccinoUser.createdAt, .lessThan, Date())
 		 )
 		 ```
 		 
@@ -49,7 +49,7 @@ extension Firappuccino {
 		 ````
 		 let users = try await Firappuccino.FQuery.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
-		 (\MyFirappuccinoUser.dateCreated, .lessThan, Date()),
+		 (\MyFirappuccinoUser.createdAt, .lessThan, Date()),
 		 order: .ascending, limit: 8
 		 )
 		 ````
@@ -73,9 +73,9 @@ extension Firappuccino {
 
 		private static func `whereConditions`<T, U>(_ conditions: [QueryCondition<T, U>], order: OrderBy?, limit: Int?) async -> [T] where T: FDocument {
 			let collectionName = String(describing: T.self)
-			let collection1 = db.collection(collectionName)
+			let collection = db.collection(collectionName)
 			guard conditions.count > 0 else { return [] }
-			var query: Query = conditions.first!.`apply`(to: collection1)
+			var query: Query = conditions.first!.`apply`(to: collection)
 			for condition in conditions.dropFirst() {
 				query = condition.`apply`(to: query)
 			}
