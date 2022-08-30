@@ -52,48 +52,48 @@ final class ExampleAuthService: ObservableObject {
 	@Published var isAuthenticating = false
 	@Published var isSigningUp = false
 	
-	func login(with loginOption: LoginOption) throws {
+	@MainActor func login(with loginOption: LoginOption) async throws {
 		
-	Task {
-		DispatchQueue.main.async {
-			self.isAuthenticating = true
-			self.isSigningUp = false
-			ExampleAuthService.currentSession.isSigningUp = false
-			self.error = nil
-		}
-		
-		switch loginOption {
-				
-			case .signInWithApple:
-				FAuth.signInWithApple()
-				self.isAuthenticating = false
-				
-			case .signInWithGoogle:
-				do {
-					try await FAuth.signInWithGoogle(clientID: AppConstants.ClientId)
-					DispatchQueue.main.async {
-						self.isAuthenticating = false
+//		Task {
+//			DispatchQueue.main.async {
+				self.isAuthenticating = true
+				self.isSigningUp = false
+				ExampleAuthService.currentSession.isSigningUp = false
+				self.error = nil
+//			}
+			
+			switch loginOption {
+					
+				case .signInWithApple:
+					FAuth.signInWithApple()
+					self.isAuthenticating = false
+					
+				case .signInWithGoogle:
+					do {
+						try await FAuth.signInWithGoogle(clientID: AppConstants.clientID)
+//						DispatchQueue.main.async {
+							self.isAuthenticating = false
+//						}
 					}
-				}
-				catch let error as NSError {
-					Firappuccino.logger.error("\(error.localizedDescription)")
-					throw error
-				}
-				
-			case let .emailAndPassword(email, password):
-				
-				do {
-					try await FAuth.signIn(email: email, password: password)
-					DispatchQueue.main.async {
-						self.isAuthenticating = false
+					catch let error as NSError {
+						Firappuccino.logger.error("\(error.localizedDescription)")
+						throw error
 					}
-				}
-				catch let error as NSError {
-					Firappuccino.logger.error("\(error.localizedDescription)")
-					throw error
-				}
-		}
-		}
+					
+				case let .emailAndPassword(email, password):
+					
+					do {
+						try await FAuth.signIn(email: email, password: password)
+//						DispatchQueue.main.async {
+							self.isAuthenticating = false
+//						}
+					}
+					catch let error as NSError {
+						Firappuccino.logger.error("\(error.localizedDescription)")
+						throw error
+					}
+			}
+//		}
 	}
 	
 	func signout() throws {
@@ -108,92 +108,94 @@ final class ExampleAuthService: ObservableObject {
 	
 	func signup(email: String, firstName: String, lastName: String, password: String, passwordConfirmation: String) throws {
 		Task {
-		guard password == passwordConfirmation else {
-			let error = NSError(domain: "xyz.firappuccino.ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: "Password and confirmation does not match"])
-			Firappuccino.logger.warning("\(error.localizedDescription)")
-			self.error = error
-			throw error
-
+			guard password == passwordConfirmation else {
+				let error = NSError(domain: "xyz.firappuccino.ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: "Password and confirmation does not match"])
+				Firappuccino.logger.warning("\(error.localizedDescription)")
+				self.error = error
+				throw error
+				
 			}
-		
-			DispatchQueue.main.async { [self] in
-		isAuthenticating = true
-		isSigningUp = true
-		ExampleAuthService.currentSession.isSigningUp = true
-		error = nil
-		}
-		do {
-			try await FAuth.createAccount(email: email, password: password)
-			DispatchQueue.main.async {
-				self.isAuthenticating = false
-				self.error = nil
-			}
-			DispatchQueue.main.async {self.isSigningUp = false}
 			
-		}
-		catch let error {
-			throw NSError(domain: "xyz.firappuccino.ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-		}
+			DispatchQueue.main.async { [self] in
+				isAuthenticating = true
+				isSigningUp = true
+				ExampleAuthService.currentSession.isSigningUp = true
+				error = nil
+			}
+			do {
+				try await FAuth.createAccount(email: email, password: password)
+				DispatchQueue.main.async {
+					self.isAuthenticating = false
+					self.error = nil
+				}
+				DispatchQueue.main.async {self.isSigningUp = false}
+				
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
+			}
 		}
 	}
 	
 	func sendEmailVerification() throws {
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		
-		try await currentUser.refreshEmailVerificationStatus()
-		try await currentUser.sendEmailVerification()
-			
+			do {
+				try await currentUser.refreshEmailVerificationStatus()
+				try await currentUser.sendEmailVerification()
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
+			}
 		}
 	}
 	
 	func updatePassword(to newPassword: String) throws {
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		try await currentUser.updatePasswordTo(newPassword: newPassword)}
+			do {
+				try await currentUser.updatePasswordTo(newPassword: newPassword)
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
+			}
+		}
 	}
 	
 	func sendPasswordReset(to email: String) throws {
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		try await currentUser.sendPasswordReset()
+			do {
+				try await currentUser.sendPasswordReset()
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
+			}
 		}
 	}
 	
 	func updateEmail(to email: String) throws {
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		
-		do {
-			try await currentUser.updateEmail(to: email, ofUserType: ExampleFUser.self)
-		}
-		catch let error as NSError {
-			Firappuccino.logger.error("\(error.localizedDescription)")
-			throw error
-		}
+			do {
+				try await currentUser.updateEmail(to: email, ofUserType: ExampleFUser.self)
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
+			}
 		}
 	}
 	
 	
 	func updateProfile() throws {
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		do {
-			try await currentUser.write()
-		}
-		catch let error {
-			Firappuccino.logger.error("\(error.localizedDescription)")
-			throw error
+			do {
+				try await currentUser.write()
+			}
+			catch let error as NSError {
+				Firappuccino.logger.error("\(error.localizedDescription)")
+				throw error
 			}
 		}
 	}
@@ -201,16 +203,13 @@ final class ExampleAuthService: ObservableObject {
 	func remove() throws {
 		//TODO: - Implement Confirmation Alert
 		Task {
-//			guard let currentUser = currentUser else {
-//			return
-//		}
-		do {
+			do {
+				try await Firappuccino.Trash.remove(currentUser)
+			}
+			catch let error as NSError {
+				throw error
+			}
 			try await Firappuccino.Trash.remove(currentUser)
-		}
-		catch let error {
-			throw NSError(domain: "xyz.firappuccino.ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-		}
-		try await Firappuccino.Trash.remove(currentUser)
 		}
 	}
 }

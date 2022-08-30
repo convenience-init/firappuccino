@@ -9,6 +9,8 @@ public typealias CollectionName = String
 
 public struct Firappuccino {
 	
+	public static let sender = LegacyFPNSender()
+	
 	public static let logger = Logger(label: "uno.cuatrotresdos.firappuccino.main")
 	
 	/// The `Firestore` Database

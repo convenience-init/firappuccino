@@ -18,16 +18,6 @@ class ExamplePostsService: ObservableObject {
 		}
 		.assign(to: \.postServices, on: self)
 		.store(in: &cancellables)
-		///
-//		repository.$examplePosts.assign(to: \.examplePosts, on: self)
-//			.store(in: &cancellables)
-//
-//		ExampleAuthService.currentSession.$currentUser
-//			.receive(on: DispatchQueue.main)
-//			.sink { [weak self] _ in
-//			self?.repository.get()
-//		}
-//		.store(in: &cancellables)
 	}
 	
 	func addPost(_ post: ExamplePost, image: UIImage? = nil) async throws {
@@ -40,5 +30,9 @@ class ExamplePostsService: ObservableObject {
 	
 	func updatePost(_ post: ExamplePost) async throws {
 		try await postRepository.update(post)
+	}
+	
+	func likePost(_ post: ExamplePost) async throws {
+		try await postRepository.like(post)
 	}
 }

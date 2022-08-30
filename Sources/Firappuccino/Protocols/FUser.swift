@@ -3,7 +3,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import Logging
 
-public protocol FUser: NSObjectProtocol, FIndexable {
+public protocol FUser: FIndexable {
 	
 	var notifications: [FPNMessage] { get set }
 	

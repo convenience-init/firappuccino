@@ -85,6 +85,19 @@ public struct FPNMessaging {
 		}
 	}
 	
+	public static func sendLegacyUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
+		
+		do {
+			//FIXME: - Use a category enum and an `allCases` computed property
+			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
+			try await Firappuccino.sender.send(message, to: recipient, data: ["count": recipient.notifications.filter({ !$0.read }).count])
+//			try await FPNMessaging.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
+		}
+		catch let error as NSError {
+			Firappuccino.logger.error("\(error.localizedDescription)")
+			throw error
+		}
+	}
 	/// Triggers the send of a FPNMessage Payload to the specified `FUser`
 	/// - Parameters:
 	///   - sender: The `FUser` whose in-app action triggered the send.

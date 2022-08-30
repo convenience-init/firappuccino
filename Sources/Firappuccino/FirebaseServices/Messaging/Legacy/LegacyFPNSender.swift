@@ -7,7 +7,7 @@ public class LegacyFPNSender {
 	 - parameter notification: The notification to send to the user.
 	 - parameter user: The user to send the notification to.
 	 */
-	public func send<T>(_ notification: FPNMessage, to user: T, data: [AnyHashable: AnyHashable] = ["count": 0]) where T: FUser {
+	public func send<T>(_ notification: FPNMessage, to user: T, data: [AnyHashable: AnyHashable] = ["count": 0]) async throws where T: FUser {
 		guard !user.disabledMessageCategories.contains(notification.category) else {
 			return Firappuccino.logger.warning("Message not sent because the recipient has the message category '`\(notification.category)' disabled.")
 			
@@ -15,7 +15,7 @@ public class LegacyFPNSender {
 		sendNotification(to: user, title: "", body: notification.pushBody, data: data)
 	}
 	
-	public func sendNotification<T>(to user: T, title: String, body: String, data: [AnyHashable: Any] = [:]) where T: FUser {
+	private func sendNotification<T>(to user: T, title: String, body: String, data: [AnyHashable: Any] = [:]) where T: FUser {
 		guard !Configurator.legacyMessagingAPIKey.isEmpty else {
 			return Firappuccino.logger.critical("No Legacy MessagingAPI Key has been set! Ensure that `Configurator.legacyMessagingAPIKey` is set before using Legacy API Messaging.")
 			

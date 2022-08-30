@@ -19,7 +19,7 @@ struct AuthView: View {
 					
 					SignInAppleButton {
 						
-						Task { try authService.login(with: .signInWithApple)
+						Task { try await authService.login(with: .signInWithApple)
 						}
 					}
 					.frame(width: 130, height: 44)

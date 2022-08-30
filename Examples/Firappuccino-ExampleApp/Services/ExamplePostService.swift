@@ -29,9 +29,8 @@ final class ExamplePostService: ObservableObject, Identifiable {
 		try await postRepository.remove(examplePost)
 	}
 	
-//	func add(title: String, message: String) async throws {
-//		let newPost = ExamplePost(title: title, message: message)
-//		try await postRepository.add(newPost)
-//	}
+	func like() async throws {
+		try await postRepository.like(examplePost)
+	}
 }
 

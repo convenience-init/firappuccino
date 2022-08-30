@@ -55,7 +55,10 @@ struct AuthForm: View {
 					.foregroundColor(.white)
 					.toggleStyle(CheckBoxStyle())
 				
-				Button(action: emailAuthenticationTapped) {
+				Button(action: {
+					Task { try? await emailAuthenticationTapped() }
+					
+				}) {
 					Text(authType.text)
 						.font(.callout)
 				}
@@ -76,11 +79,11 @@ struct AuthForm: View {
 		}
 	}
 	
-	private func emailAuthenticationTapped() {
+	private func emailAuthenticationTapped() async throws {
 		switch authType {
 			case .login:
 				do {
-					try authService.login(with: .emailAndPassword(email: email, password: password))
+					try await authService.login(with: .emailAndPassword(email: email, password: password))
 				}
 				catch let error as NSError {
 					Firappuccino.logger.error("\(error.localizedDescription)")

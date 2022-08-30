@@ -3,7 +3,7 @@ import Foundation
 
 import SwiftUI
 
-// NOTE: Please edit this file when to customize walk through.
+// NOTE: Edit this file to customize walk through.
 struct WalkThroughContainerView: View {
 	enum Page {
 		case one, two

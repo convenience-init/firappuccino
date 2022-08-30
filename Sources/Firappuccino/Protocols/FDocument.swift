@@ -51,7 +51,7 @@ public typealias DocumentID = String
 
  ```
  */
-public protocol FDocument: FModel, Equatable, Identifiable {
+public protocol FDocument: NSObject, FModel, Identifiable {
 	
 	/// The document's unique identifier.
 	///
@@ -114,8 +114,9 @@ extension FDocument {
 	 - parameter value: The new value.
 	 - parameter path: The path to the field to update.
 	 */
-//	public mutating func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
-//		self[keyPath: path] = value
+//	public func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+//		var _self = self
+//		_self[keyPath: path] = value
 //		//FIXME: - refactor out `fieldName`
 //		do {
 //			try await Firappuccino.Write.`write`(field: field, with: value, using: path, in: _self)
@@ -124,8 +125,10 @@ extension FDocument {
 //			Firappuccino.logger.error("\(error.localizedDescription)")
 //		}
 //	}
-	public mutating func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
-		self[keyPath: path] = value
+	
+	public func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+		var _self = self
+		_self[keyPath: path] = value
 		//FIXME: - refactor out `fieldName`
 		do {
 			try await Firappuccino.Write.`write`(value: value, using: path, in: self)
@@ -134,6 +137,7 @@ extension FDocument {
 			Firappuccino.logger.error("\(error.localizedDescription)")
 		}
 	}
+	
 	/**
 	 Increments a specific field remotely in Firestore.
 	 
@@ -141,13 +145,14 @@ extension FDocument {
 	 - parameter increment: The amount to increment by.
 	 - parameter completion: The completion handler.
 	 */
-	public mutating func increment<T>(_ path: WritableKeyPath<Self, T>, by increment: T) async throws where T: AdditiveArithmetic {
+	public func increment<T>(_ path: WritableKeyPath<Self, T>, by increment: T) async throws where T: AdditiveArithmetic {
 		do {
 			var fieldValue = self[keyPath: path]
 			if let incrementAmount = increment as? Int {
-				try await Firappuccino.Stride.increment(path, by: incrementAmount, in: self)
+				try await Firappuccino.Stride.increment(path.string, by: incrementAmount, in: self)
 				fieldValue.add(increment)
-				self[keyPath: path] = fieldValue
+				var _self = self
+				_self[keyPath: path] = fieldValue
 			}
 		}
 		catch let error as NSError {
@@ -166,7 +171,7 @@ extension FDocument {
 	 If you don't want to update the entire object, and instead you just want to fetch a particular value, this method may be helpful.
 	 */
 	public func `fetch`<T>(_ path: KeyPath<Self, T>) async throws -> T? where T: Codable {
-		guard let document = try await Firappuccino.Fetch.`fetch`(id: id, ofType: Self.self) else { return nil }
+		guard let document = try await Firappuccino.Fetch.`fetch`(id: self.id, ofType: Self.self) else { return nil }
 		return document[keyPath: path]
 		
 	}
@@ -181,7 +186,18 @@ extension FDocument {
 	///   ```post.assign(to: \.draftPosts, in: user)```
 	///   will add the `post`'s ID to `users`'s `draftPosts`.
 	///  - important: Fields will not be updated locally using this method.
-	public func `link`<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//	public func `link`<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//
+//		do {
+//			try await Firappuccino.Relate.`link`(self, toField: field, using: path, in: parent)
+//		}
+//		catch let error as NSError {
+//			Firappuccino.logger.error("\(error.localizedDescription)")
+//			throw error
+//		}
+//	}
+	
+	public func `link`<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		
 		do {
 			try await Firappuccino.Relate.`link`(self, using: path, in: parent)
@@ -198,7 +214,8 @@ extension FDocument {
 	///   - field: field description
 	///   - path: path description
 	///   - parent: parent description
-	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+
+	public func writeAndLink<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
 			try await Firappuccino.Write.writeAndLink(self, using: path, in: parent)
 		}
@@ -207,6 +224,15 @@ extension FDocument {
 			throw error
 		}
 	}
+//	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//		do {
+//			try await Firappuccino.Write.writeAndLink(self, toField: field, using: path, in: parent)
+//		}
+//		catch let error as NSError {
+//			Firappuccino.logger.error("\(error.localizedDescription)")
+//			throw error
+//		}
+//	}
 	
 	
 	/// Unassigns the document's ID from a related list of IDs in another document.
@@ -214,7 +240,8 @@ extension FDocument {
 	///   - field: field description
 	///   - path: path description
 	///   - parent: parent description
-	public func unlink<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+
+	public func unlink<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
 			try await Firappuccino.Relate.`unlink`(self, using: path, in: parent)
 		}
@@ -223,5 +250,15 @@ extension FDocument {
 			throw error
 		}
 	}
+	
+//	public func unlink<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+//		do {
+//			try await Firappuccino.Relate.`unlink`(self, fromField: field, using: path, in: parent)
+//		}
+//		catch let error as NSError {
+//			Firappuccino.logger.error("\(error.localizedDescription)")
+//			throw error
+//		}
+//	}
 }
 

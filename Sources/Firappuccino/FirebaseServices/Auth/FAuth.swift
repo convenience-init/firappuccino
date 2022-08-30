@@ -39,7 +39,7 @@ public class FAuth: NSObject {
 	 - parameter email: The email to associate with the account.
 	 - parameter password: The password for the account.
 	 */
-	public static func createAccount(email: String, password: String) async throws {
+	@MainActor public static func createAccount(email: String, password: String) async throws {
 		
 		do {
 			let authResult = try await auth.createUser(withEmail: email, password: password)
@@ -102,44 +102,23 @@ public class FAuth: NSObject {
 	/// - Parameters:
 	///   - type: The `Type` of your custom `FUser` object or subclass
 	///   - action: A closure containing the actions to perform when the the `FUser` object changes.
-//	@MainActor public static func onUserUpdate<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FUser {
-//		if let authHandle = authHandle {
-//			auth.removeStateDidChangeListener(authHandle)
-//		}
-//		authHandle = auth.addStateDidChangeListener { _, user in
-//			Task {
-//				guard let user = user, let newUser = await T.get(from: user), !newUser.isDummy else { return }
-//				Firappuccino.Listen.stop(listenerKey)
-//				Firappuccino.Listen.`listen`(to: newUser.id, ofType: T.self, key: listenerKey) { document in
-//					guard let document = document else {
-//						action(newUser)
-//						Task {try? await newUser.`write`()}
-//						return
-//					}
-//					action(document)
-//				}
-//			}
-//		}
-//	}
-	@MainActor public static func onUserUpdate<T>(ofType type: T.Type, action: @escaping (T?) -> Void) where T: FUser {
-
+	//
+	
+	
+	@MainActor public static func onAuthStateChanged<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FUser {
 		if let authHandle = authHandle {
 			auth.removeStateDidChangeListener(authHandle)
 		}
-
 		authHandle = auth.addStateDidChangeListener { _, user in
 			guard let user = user, let newUser = T.get(from: user), !newUser.isDummy else { return }
 			Firappuccino.Listen.stop(listenerKey)
-			Firappuccino.Listen.listen(to: newUser.id, ofType: T.self, key: listenerKey) { user in
-				guard let user = user else {
-					Task {
-						action(newUser)
-						//TODO: - Add variadic func for additional new user params based on T
-						try? await newUser.write()
-					}
+			Firappuccino.Listen.listen(to: newUser.id, ofType: T.self, key: listenerKey) { document in
+				guard let document = document else {
+					action(newUser)
+					Task { try await newUser.`writeAndIndex`() }
 					return
 				}
-				action(user)
+				action(document)
 			}
 		}
 	}
@@ -177,33 +156,6 @@ public class FAuth: NSObject {
 			throw error
 		}
 	}
-	
-	/// Provides a callback to execute code actions when `AuthState` changes.
-	/// - Parameter action: A closure containing the code to execute after this method is called.
-//	@available(*, renamed: "onAuthChange()")
-//	internal static func onAuthChange<T>(perform action: @escaping (T?) -> Void) where T: FUser {
-//
-//		if let authHandle = authHandle {
-//			auth.removeStateDidChangeListener(authHandle)
-//		}
-//		authHandle = auth.addStateDidChangeListener { _, user in
-//			Task {
-//				guard let user = user, let newUser = T.get(from: user) else { return }
-//				guard let document = try await Firappuccino.Fetch.`fetch`(id: newUser.id, ofType: T.self) else { return try await newUser.`write`()
-//				}
-//				action(document)
-//			}
-//		}
-//	}
-	
-//	internal static func onAuthChange<T>() async -> T? where T: FUser {
-//		return await withCheckedContinuation { continuation in
-//			onAuthChange() { result in
-//				continuation.resume(returning: result)
-//			}
-//		}
-//	}
-	
 	
 
 	/// Handles the `FAuth` authentication result

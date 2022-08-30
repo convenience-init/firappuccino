@@ -1,6 +1,11 @@
 import UIKit
 
 struct AppConstants {
+	
+	struct userDefaults {
+		static let didWalkThroughKey = "didWalkThrough"
+	}
+	
 	static let clientID = "10095415638-trc907bbbvfn0ohj0c83h5detit63jfv"
 	static let googleAppID = "1:10095415638:ios:f62e2a5a31f2da796986f7"
 	static let gcmSenderID =  "10095415638"
