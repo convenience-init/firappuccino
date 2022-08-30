@@ -3,9 +3,11 @@ import SwiftUI
 struct TextFieldAlertView: UIViewControllerRepresentable {
 	
 	@Binding var text: String
+	@Binding var messageText: String
 	@Binding var isShowingAlert: Bool
 	
 	let placeholder: String
+	let placeholder2: String
 	//    let isSecureTextEntry: Bool
 	let title: String
 	let message: String
@@ -40,6 +42,13 @@ struct TextFieldAlertView: UIViewControllerRepresentable {
 			//            textField.isSecureTextEntry = isSecureTextEntry
 		}
 		
+		alert.addTextField { textField in
+			textField.placeholder = placeholder2
+			textField.text = text
+			textField.delegate = context.coordinator
+			//            textField.isSecureTextEntry = isSecureTextEntry
+		}
+		
 		if leftButtonTitle != nil {
 			alert.addAction(UIAlertAction(title: leftButtonTitle, style: .default) { _ in
 				alert.dismiss(animated: true) {
@@ -51,9 +60,14 @@ struct TextFieldAlertView: UIViewControllerRepresentable {
 		
 		if rightButtonTitle != nil {
 			alert.addAction(UIAlertAction(title: rightButtonTitle, style: .default) { _ in
-				if let textField = alert.textFields?.first, let text = textField.text {
+				if let textField = alert.textFields?[0], let text = textField.text {
 					self.text = text
 				}
+				
+				if let textField2 = alert.textFields?[1], let message = textField2.text {
+					self.messageText = message
+				}
+				
 				alert.dismiss(animated: true) {
 					isShowingAlert = false
 					rightButtonAction?()
