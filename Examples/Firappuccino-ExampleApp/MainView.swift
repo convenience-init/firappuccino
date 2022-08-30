@@ -1,20 +1,20 @@
 import SwiftUI
+import FirebaseAuth
 
 struct MainView: View {
 	@EnvironmentObject var authService: ExampleAuthService
-	@EnvironmentObject var postService: ExamplePostsService
+	@EnvironmentObject var postsService: ExamplePostsService
 	
 	var body: some View {
 		Group {
-			if authService.user != nil {
-				NavigationView {
-					SamplePostsView()
-				}
+			if let _ = Auth.auth().currentUser {
+					MainTabView()
 				.environmentObject(authService)
-				.environmentObject(postService)
+				.environmentObject(postsService)
 			}
 			else {
 				AuthView(authType: .login)
+				.environmentObject(authService)
 			}
 		}
 		.animation(.easeInOut)
@@ -23,10 +23,10 @@ struct MainView: View {
 	}
 }
 
-struct MainView_Previews: PreviewProvider {
-	static var previews: some View {
-		MainView()
-		.environmentObject(ExampleAuthService.currentSession)
-		.environmentObject(ExamplePostsService())
-	}
-}
+//struct MainView_Previews: PreviewProvider {
+//	static var previews: some View {
+//		MainView()
+//		.environmentObject(ExampleAuthService.currentSession)
+//		.environmentObject(ExamplePostsService())
+//	}
+//}

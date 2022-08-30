@@ -12,8 +12,8 @@ struct ContentView: View {
 			}
 			else {
 				MainView()
-					.environmentObject(ExamplePostsService())
 				// NOTE: Add services here
+					.environmentObject(ExamplePostsService())
 					.environmentObject(ExampleAuthService.currentSession)
 			}
 		}

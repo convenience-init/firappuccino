@@ -18,7 +18,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		Configurator.configurate(WithOptions: nil, globalOverrideLogLevel: Logger.Level.error)
 
 		// for debug
-				UserDefaults.standard.set(false, forKey: Constants.userDefaults.didWalkThroughKey)
+//				UserDefaults.standard.set(false, forKey: Constants.userDefaults.didWalkThroughKey)
 		return true
 	}
 }
@@ -37,12 +37,15 @@ struct ExampleApp: App {
 			.environmentObject(authService)
 			.environmentObject(postService)
 			.onAppear {
-				FAuth.onUserUpdate(ofType: ExampleFUser.self) { user in
+				FAuth.onAuthStateChanged(ofType: ExampleFUser.self) { user in
 					guard let user = user, !user.isDummy else { return }
 					if authService.isSigningUp == true {
 						user.progress = 0
+						user.firstName = authService.currentUser.displayName
+						user.lastName = String(authService.currentUser.displayName.reversed())
+						
 						Task {
-							try await user.updateDisplayName(to: "\(authService.currentUser.firstName) \(authService.currentUser.lastName)", ofUserType: ExampleFUser.self)
+							try await user.updateDisplayName(to: "\(user.firstName) \(user.lastName)", ofUserType: ExampleFUser.self)
 						}
 					}
 					authService.currentUser = user
@@ -51,7 +54,6 @@ struct ExampleApp: App {
 						authService.pushManager = LegacyFPNManager(userID: userId)
 						authService.pushManager?.registerForPushNotifications()
 					}
-					
 					return
 				}
 			}
