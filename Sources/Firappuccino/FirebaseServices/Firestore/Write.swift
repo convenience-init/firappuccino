@@ -6,9 +6,9 @@ public typealias FieldName = String
 extension Firappuccino {
 	
 	/**
-	 The `FStore` lets `Firappuccino` handle the management of your `FDocument`s in Firestore
+	 The `Write` lets `Firappuccino` handle the management of your `FDocument`s in Firestore
 	 */
-	public struct FStore {
+	public struct Write {
 		
 		/**
 		 Sets a document in Firestore.

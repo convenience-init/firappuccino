@@ -5,7 +5,7 @@ import FirebaseMessaging
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-open class FUserBase: NSObject, FUser {	
+open class FUserBase: NSObject, FUser {
 	
 	public var index: Int?
 	

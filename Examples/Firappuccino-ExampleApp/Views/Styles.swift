@@ -152,11 +152,11 @@ struct XCAButtonStyle: ButtonStyle {
 	}
 }
 
-struct StylesView_Previews: PreviewProvider {
-	static var previews: some View {
-		StylesView()
-	}
-}
+//struct StylesView_Previews: PreviewProvider {
+//	static var previews: some View {
+//		StylesView()
+//	}
+//}
 
 struct DismissingKeyboard: ViewModifier {
 	func body(content: Content) -> some View {

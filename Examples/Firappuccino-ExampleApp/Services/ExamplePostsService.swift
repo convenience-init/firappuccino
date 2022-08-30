@@ -11,9 +11,8 @@ class ExamplePostsService: ObservableObject {
 	private var cancellables: Set<AnyCancellable> = []
 	
 	init() {
-		//Listen to cards and maps every Joke element of each `jokes` array in the repository into a JokeItemViewModel. This will create an array of JokeItemViewModels for each joke array.
-		
-		// Posts
+		//Listen to and map every element of the `examplePosts` array in the `postRepository` into an `ExamplePostService`, creatng an array of `ExamplePostService`, one for each item.
+
 		postRepository.$examplePosts.map { posts in
 			posts.map(ExamplePostService.init)
 		}
@@ -39,12 +38,7 @@ class ExamplePostsService: ObservableObject {
 		try await postRepository.remove(post)
 	}
 	
-	func updateJoke(_ post: ExamplePost) async throws {
+	func updatePost(_ post: ExamplePost) async throws {
 		try await postRepository.update(post)
 	}
-//	func add(title: String, message: String, image: UIImage? = nil) async throws {
-//		//TODO: refactor for image attachment
-//		let newPost = ExamplePost(title: title, message: message)
-//		try await postRepository.add(newPost)
-//	}
 }

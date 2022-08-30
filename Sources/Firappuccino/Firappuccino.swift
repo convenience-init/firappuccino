@@ -38,7 +38,7 @@ public struct Firappuccino {
 	/// Standardizes naming of `Firestore` Collections by using the `String` representation of the `Type` of object to be stored within it.
 	/// - Parameter type: the `Type` of the object to be stored.
 	/// - Returns: A `String` reresentation of the passed object's `Type`.
-	internal static func colName<T>(of type: T.Type) -> CollectionName {
+	public static func colName<T>(of type: T.Type) -> CollectionName {
 		var str = String(describing: T.self)
 		if let dotRange = str.range(of: ".") {
 			str.removeSubrange(str.startIndex ..< dotRange.lowerBound)

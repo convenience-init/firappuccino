@@ -111,10 +111,10 @@ struct AuthForm: View {
 	}
 }
 
-struct AuthForm_Previews: PreviewProvider {
-	static var previews: some View {
-		AuthForm(authType: .constant(AuthenticationType.login))
-		.environmentObject(ExampleAuthService.currentSession)
-	}
-}
+//struct AuthForm_Previews: PreviewProvider {
+//	static var previews: some View {
+//		AuthForm(authType: .constant(AuthenticationType.login))
+//		.environmentObject(ExampleAuthService.currentSession)
+//	}
+//}
 

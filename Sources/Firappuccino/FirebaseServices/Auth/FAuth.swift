@@ -13,6 +13,7 @@ public class FAuth: NSObject {
 		case profile = "https://firebasestorage.googleapis.com/v0/b/hilarist-authentication.appspot.com/o/FCMImages%2FHilaristPreviewProfileImage.png?alt=media&token=0d1a5276-4cea-4562-a0d2-c14c5cc6571b"
 		
 	}
+	
 	public static var defaultProfileImageURL: URL = URL(string: DefaultImageURL.profile.rawValue)!
 	
 	public internal(set) static var emailVerified: Bool = false
@@ -56,14 +57,12 @@ public class FAuth: NSObject {
 	public static func signIn(email: String, password: String) async throws {
 		
 		accountProvider = .email
-		
 		do {
-			
 			let authResult = try await auth.signIn(withEmail: email, password: password)
 			
 			try await handleAuthResult(authResult: authResult, error: nil)
 		}
-		catch {
+		catch let error as NSError {
 			try await handleAuthResult(authResult: nil, error: error)
 		}
 	}
@@ -77,14 +76,13 @@ public class FAuth: NSObject {
 	///```signInWithGoogle(clientID:secret:)```
 	/// instead.
 	public static func signIn(with credential: AuthCredential) async throws {
-		
 		do {
 			async let authResult = try await auth.signIn(with: credential)
 			try await handleAuthResult(authResult: try await authResult, error: nil)
 		}
-		catch let error {
+		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
-			try? await handleAuthResult(authResult: nil, error: error)
+			try await handleAuthResult(authResult: nil, error: error)
 		}
 	}
 	
@@ -145,7 +143,7 @@ public class FAuth: NSObject {
 			}
 		}
 	}
-	
+
 	/// Checks to see if a username is unique in your `FUser` objects collection in `Firestore`.
 	/// - Parameters:
 	///   - username: The username to query for.
@@ -207,6 +205,7 @@ public class FAuth: NSObject {
 //	}
 	
 	
+
 	/// Handles the `FAuth` authentication result
 	/// - Parameters:
 	///   - authResult: An optional `AuthDataResult` or `nil`

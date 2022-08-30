@@ -9,7 +9,7 @@ public typealias IndividuatableName = DocumentID
  
  All `Individuatable`s are stored in a seperate collection named `Individuatable`. Each `Individuatable` should have a unique `Type`, and only one `Individuatable` of each `Type` should exist within the `Individuatable` collection.
  
- `Individuatable`s can be stored in Firestore using `Firappuccino.FStore`.
+ `Individuatable`s can be stored in Firestore using `Firappuccino.Write`.
  */
 public protocol Individuatable: FDocument {
 	

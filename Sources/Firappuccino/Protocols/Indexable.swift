@@ -28,7 +28,7 @@ public extension FIndexable {
 	func `writeAndIndex`() async throws {
 		do {
 			async let newSelf = Self.prepare(self)
-			try await Firappuccino.FStore.`write`(try await newSelf)
+			try await Firappuccino.Write.`write`(try await newSelf)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

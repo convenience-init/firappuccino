@@ -18,7 +18,6 @@ class ExampleFUser: FUserBase {
 		try super.init(from: decoder)
 		let values = try decoder.container(keyedBy: CodingKeys.self)
 	
-//		examplePosts = try values.decode([ExamplePost].self, forKey: .examplePosts)
 		firstName = try values.decode(String.self, forKey: .firstName)
 		lastName = try values.decode(String.self, forKey: .lastName)
 	}
@@ -28,6 +27,5 @@ class ExampleFUser: FUserBase {
 		var container = encoder.container(keyedBy: CodingKeys.self)
 		try container.encode(firstName, forKey: .firstName)
 		try container.encode(lastName, forKey: .lastName)
-//		try container.encode(examplePosts, forKey: .posts)
 	}
 }

@@ -35,10 +35,9 @@ FAnalytics.log("post", data: [
  - Remark:  No data collected by `FAnalytics` is linked to a specific user, and no user data are intentionally collected. If you wish to link analytics data to a specific user, call `FAnalytics.setUserId(_:)` first.
  */
 public struct FAnalytics {
-		
+
 	/// The timeout duration.
-	///
-	/// To prevent logging spam, the timeout duration is checked. If another Analytics-related action is performed within the timeout duration, it will not be logged to Firebase Analytics.
+	/// If another Analytics-related action is performed within the timeout duration, it will not be logged to Firebase Analytics.
 	public static var timeout: TimeInterval = TimeInterval(2.0)
 	
 	/// Whether to collect analytics data.
@@ -66,14 +65,23 @@ public struct FAnalytics {
 	 - parameter data: Any data associated with the event
 	 */
 	public static func log(_ key: FAnalyticsEventKey, data: [String: Any]? = [:]) {
+#if DEBUG
+		print("Don't send events...")
+#else
 		if let lastLog = lastLog {
 			guard lastLog.distance(to: Date()) > timeout else { return }
 		}
 		lastLog = Date()
 		Analytics.logEvent(key, parameters: data)
+#endif
 	}
 		
 	internal static func `write`(_ key: FAnalyticsUserPropertyKey, value: String?) {
+		#if DEBUG
+				print("Don't send events...")
+		#else
 		Analytics.setUserProperty(value, forName: key)
+		#endif
+
 	}
 }

@@ -9,14 +9,15 @@ final class ExamplePostService: ObservableObject, Identifiable {
 	
 	//store subscriptions so we can cancel them later
 	private var cancellables: Set<AnyCancellable> = []
-	var id = ""
+	
+	var postID = ""
 	
 	init(post: ExamplePost) {
 		self.examplePost = post
-		//Set up a binding for card between the joke’s id and the view model’s id. Then store the object in cancellables so it can be canceled later on
+		//Set up a binding between an `ExamplePost`’s `id` and the `ExamplePostService`’s `postID` and store in cancellables
 		$examplePost
 			.compactMap { $0.id }
-			.assign(to: \.id, on: self)
+			.assign(to: \.postID, on: self)
 			.store(in: &cancellables)
 	}
 	

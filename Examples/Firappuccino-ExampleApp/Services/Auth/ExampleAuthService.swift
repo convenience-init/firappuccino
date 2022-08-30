@@ -20,7 +20,7 @@ enum AuthenticationType: String {
 	}
 	
 	var assetBackgroundName: String {
-		self == .login ? "login" : "signup"
+		self == .login ? "login" : "login"
 	}
 	
 	var footerText: String {
@@ -41,9 +41,8 @@ final class ExampleAuthService: ObservableObject {
 	@Published var user: User?
 	@Published var currentUser: ExampleFUser
 	@Published var pushManager: LegacyFPNManager?
-	@Published var sender = LegacyFPNSender()
 	@Published var error: NSError?
-
+	
 	private var authenticationStateHandler: AuthStateDidChangeListenerHandle?
 	
 	init() {

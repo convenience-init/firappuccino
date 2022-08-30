@@ -1,8 +1,8 @@
 import Foundation
+import Combine
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 import FirebaseFunctions
-import Combine
 import Firappuccino
 
 final class ExamplePostRepository: ObservableObject {
@@ -10,22 +10,24 @@ final class ExamplePostRepository: ObservableObject {
 	@Published var examplePosts: [ExamplePost] = []
 	@Published var error: NSError? = nil
 	
-	var cancellables: Set<AnyCancellable> = []
 	private lazy var functions = Functions.functions(region: "us-central1")
-	private var path = "ExamplePost"
+	
+	private var cancellables: Set<AnyCancellable> = []
+	
 	private var userId = ""
 	private let authService = ExampleAuthService.currentSession
 	private let store = Firappuccino.db
 
 	init() {
-		//Bind hilaristUser‘s id from UserSession to the repository’s userId. It also stores the object in cancellables so it can be canceled later.
+		
 		authService.$currentUser
 			.compactMap { user in
 				user.id
 			}
 			.assign(to: \.userId, on: self)
 			.store(in: &cancellables)
-		//This code observes the changes in user, uses receive(on:options:) to set the thread where the code will execute and then attaches a subscriber using sink(receiveValue:). This guarantees that when you get a user from HilaristsAuthenticationManager, the code in the closure executes in the main thread.
+		
+		//observe the changes in user with receive(on:options:) on the main thread and then attach a subscriber using sink(receiveValue:)
 		authService.$currentUser
 			.receive(on: DispatchQueue.main)
 			.sink { [weak self] _ in
@@ -54,7 +56,7 @@ final class ExamplePostRepository: ObservableObject {
 			return try await FirappuccinoStorageResource.attachImageResource(to: post, using: data, andPath: andPath, progress: progress)
 		}
 		catch let error {
-			self.error = NSError(domain: "app.hilarists.HilaristsApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
 			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 			}
@@ -75,7 +77,7 @@ final class ExamplePostRepository: ObservableObject {
 				}
 			}
 			catch let error as NSError {
-				self.error = NSError(domain: "app.hilarists.HilaristsApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+				self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
 				Firappuccino.logger.error("\(String(describing: self.error))")
 				throw error
 			}
@@ -85,7 +87,7 @@ final class ExamplePostRepository: ObservableObject {
 				try await update(post)
 			}
 			catch let error as NSError {
-				self.error = NSError(domain: "app.hilarists.HilaristsApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+				self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
 				Firappuccino.logger.error("\(String(describing: self.error))")
 				throw error
 			}
@@ -99,7 +101,7 @@ final class ExamplePostRepository: ObservableObject {
 			try await updatedPost.write()
 		}
 		catch let error as NSError {
-			self.error = NSError(domain: "app.hilarists.HilaristsApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
 			Firappuccino.logger.error("\(String(describing: self.error))")
 			throw error
 		}
@@ -111,7 +113,7 @@ final class ExamplePostRepository: ObservableObject {
 			try await Firappuccino.Trash.remove(post)
 		}
 		catch let error as NSError {
-			self.error = NSError(domain: "app.hilarists.HilaristsApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
 			Firappuccino.logger.error("\(String(describing: self.error))")
 			throw error
 		}

@@ -85,7 +85,6 @@ public struct FPNMessaging {
 		}
 	}
 	
-	
 	/// Triggers the send of a FPNMessage Payload to the specified `FUser`
 	/// - Parameters:
 	///   - sender: The `FUser` whose in-app action triggered the send.

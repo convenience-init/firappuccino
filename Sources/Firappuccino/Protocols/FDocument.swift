@@ -84,7 +84,7 @@ extension FDocument {
 	 */
 	public func `write`() async throws {
 		do {
-			try await Firappuccino.FStore.`write`(self)
+			try await Firappuccino.Write.`write`(self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -104,7 +104,7 @@ extension FDocument {
 	///   - path: The path to the document containing the field
 	///   - ofType: The `Type` of the document to be updated.
 	public func `write`<T, U>(using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FDocument, U: Codable {
-		try await Firappuccino.FStore.`write`(to: path, in: self as! T)
+		try await Firappuccino.Write.`write`(to: path, in: self as! T)
 	}
 	
 	
@@ -118,7 +118,7 @@ extension FDocument {
 //		self[keyPath: path] = value
 //		//FIXME: - refactor out `fieldName`
 //		do {
-//			try await Firappuccino.FStore.`write`(field: field, with: value, using: path, in: self)
+//			try await Firappuccino.Write.`write`(field: field, with: value, using: path, in: _self)
 //		}
 //		catch let error as NSError {
 //			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -128,7 +128,7 @@ extension FDocument {
 		self[keyPath: path] = value
 		//FIXME: - refactor out `fieldName`
 		do {
-			try await Firappuccino.FStore.`write`(value: value, using: path, in: self)
+			try await Firappuccino.Write.`write`(value: value, using: path, in: self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -200,7 +200,7 @@ extension FDocument {
 	///   - parent: parent description
 	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.FStore.writeAndLink(self, using: path, in: parent)
+			try await Firappuccino.Write.writeAndLink(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
