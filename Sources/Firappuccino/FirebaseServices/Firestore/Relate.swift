@@ -71,7 +71,7 @@ extension Firappuccino {
 //			do {
 //				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path)  else { throw RelationError.noParentArray }
 //				array <= id
-//				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+//				try await Write.`write`(field: field, with: array, using: path, in: parent)
 //			}
 //			catch let error as NSError {
 //				Firappuccino.logger.error("\(RelationError.noParentArray)")
@@ -85,7 +85,7 @@ extension Firappuccino {
 			do {
 				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path) else { throw RelationError.noParentArray }
 				array <= id
-				try await FStore.`write`(value: array, using: path, in: parent)
+				try await Write.`write`(value: array, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(RelationError.noParentArray)")
@@ -100,20 +100,21 @@ extension Firappuccino {
 //				async let array = try await fetchArray(from: id, ofType: T.self, path: path)
 //				guard var array = try await array else { throw RelationError.noParentArray }
 //				array -= id
-//				try await FStore.`write`(field: field, with: array, using: path, in: parent)
+//				try await Write.`write`(field: field, with: array, using: path, in: parent)
 //			}
 //			catch let error as NSError {
 //				Firappuccino.logger.error("\(error.localizedDescription)")
 //				throw error
 //			}
 //		}
+		
 		private static func unappend<T>(_ id: DocumentID, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 			//FIXME: - refactor out `fieldName`
 			do {
 				async let array = try await fetchArray(from: id, ofType: T.self, path: path)
 				guard var array = try await array else { throw RelationError.noParentArray }
 				array -= id
-				try await FStore.`write`(value: array, using: path, in: parent)
+				try await Write.`write`(value: array, using: path, in: parent)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")

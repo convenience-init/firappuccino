@@ -5,6 +5,13 @@ import FirebaseAnalyticsSwift
 public typealias FAnalyticsEventKey = String
 public typealias FAnalyticsUserPropertyKey = String
 
+
+public protocol FAnalyticsParams {
+
+	/// Convenience method to
+	/// - Returns: A dictionary containing the `FAnalytics` data to send to Firebase
+	func toModel(properties: Any ...) -> [String: Any]
+}
 /**
  `FAnalytics` allows you to easily manage and perform the functions of Firebase Analytics.
   

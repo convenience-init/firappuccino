@@ -59,8 +59,7 @@ extension Firappuccino {
 		 
 		 For more information on unassignment, check out `Firappuccino.Relate`.
 		 */
-		
-		@MainActor public static func unassignThenRemove<T, U>(_ document: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+		@MainActor public static func unassignThenRemove<T, U>(_ document: T, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			
 			do {
 				try await Relate.`unlink`(document, using: path, in: parent)
@@ -71,5 +70,16 @@ extension Firappuccino {
 				throw error
 			}
 		}
+//		@MainActor public static func unassignThenRemove<T, U>(_ document: T, fromField field: FieldName, using path: KeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+//
+//			do {
+//				try await Relate.`unlink`(document, fromField: field, using: path, in: parent)
+//				try await remove(document)
+//			}
+//			catch let error as NSError {
+//				Firappuccino.logger.error("\(error.localizedDescription)")
+//				throw error
+//			}
+//		}
 	}
 }

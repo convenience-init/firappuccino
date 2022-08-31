@@ -18,11 +18,11 @@ extension Firappuccino {
 		 - parameter document: The document with the updated field.
 		 - parameter completion: The completion handler.
 		 */
-		
-		public static func increment<T, U>(_ path: KeyPath<T, U>, by amount: Int, in document: T) async throws where T: FDocument, U: AdditiveArithmetic {
+		//FIXME: Keypath fuckery
+		public static func increment<T>(_ field: String, by amount: Int, in document: T) async throws where T: FDocument {
 			do {
 				let collectionName = String(describing: T.self)
-				try await db.collection(collectionName).document(document.id).updateData([path.string: FieldValue.increment(Int64(amount))])
+				try await db.collection(collectionName).document(document.id).updateData([field: FieldValue.increment(Int64(amount))])
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
