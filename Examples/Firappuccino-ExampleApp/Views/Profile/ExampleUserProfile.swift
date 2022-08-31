@@ -8,7 +8,7 @@ struct ExampleUserProfile: View {
 		ZStack(alignment: .top) {
 			VStack(alignment: .center, spacing: 16) {
 				profilePicture
-				Text(user.username)
+				Text("\(user.firstName) \(user.lastName)")
 					.font(.title.weight(.bold))
 					.lineLimit(3)
 					.foregroundColor(.white)
@@ -68,7 +68,7 @@ struct ExampleUserProfile: View {
 			Spacer()
 		}
 		.floatingActionButton(color: Color.teal, image: Image(systemName: "person.crop.circle.badge.xmark").foregroundColor(.white)) {
-			try? authService.signout()
+			Task { try? await authService.signout() }
 		}
 	}
 	

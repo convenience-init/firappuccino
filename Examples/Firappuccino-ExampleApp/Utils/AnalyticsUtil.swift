@@ -2,7 +2,7 @@ import Foundation
 import Firebase
 import FirebaseAnalytics
 
-// NOTE: Please customize this file to send `FANalytics` events to Firebase Analytics.
+// - note: Please customize this file to send `FANalytics` events to Firebase Analytics.
 struct AnalyticsUtil {
 	struct Params {
 		//        let property1: String?
@@ -20,11 +20,11 @@ struct AnalyticsUtil {
 	}
 	
 	static func logEvent(_ event: EventType, params: Params? = nil) {
-#if DEBUG
+		#if DEBUG
 		print("Don't send events...")
-#else
+		#else
 		Analytics.logEvent(event.rawValue, parameters: params?.toObject() ?? [:])
-#endif
+		#endif
 		
 	}
 }

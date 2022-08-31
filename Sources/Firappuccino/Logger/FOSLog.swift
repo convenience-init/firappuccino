@@ -1,8 +1,8 @@
 import Foundation
 import Logging
+import os
 import struct Logging.Logger
 import class Foundation.NSLock
-import os
 
 
 /// A custom Unified LogHandler with an optional global override
@@ -79,7 +79,7 @@ public struct FOSLog: LogHandler {
 		}
 	}
 	
-	/// Add, remove, or change the logging metadata.
+	/// Add, `destroy`, or change the logging metadata.
 	/// - parameters:
 	///    - metadataKey: the key for the metadata item.
 	public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {

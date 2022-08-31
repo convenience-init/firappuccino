@@ -3,9 +3,9 @@
 public typealias DocumentID = String
 
 /**
- An `Document` object that can be stored in and managed by Firestore.
+ A Firestore-compatible document.
  
- Adopt the `FirappuccinoDocument` protocol to send your own custom data objects.
+ Adopt the `FDocument` protocol to send your own custom document models.
  
  All documents must have `id`, `createdAt` properties, as well as a way to check for equality:
  
@@ -40,7 +40,7 @@ public typealias DocumentID = String
  // Set the price of `stupidApeToo` to 200_000 in ``Firestore``
  stupidApeToo.`write`(200_000, to: \.price)
  
- // Fetch the most up-to-date price info for `stupidApeOne`
+ // Fetcher the most up-to-date price info for `stupidApeOne`
  do {
  	let currentPrice = try await stupidApeOne.`fetch`(\.price)
  	print("StupidApeOne will currently set you back \(currentPrice)")
@@ -51,17 +51,17 @@ public typealias DocumentID = String
 
  ```
  */
-public protocol FDocument: NSObject, FModel, Identifiable {
+public protocol FDocument: FModel, Identifiable, Equatable {
 	
 	/// The document's unique identifier.
 	///
-	/// It's important to note that documents with identical IDs will be merged when sent to Firestore.
+	/// -important: FDocuments with identical IDs will be merged when sent to Firestore.
 	///
 	/// To avoid this, it's advisable to assign `UUID().uuidStringSansDashes` as the default value when creating new documents.
+	///
 	var id: String { get set }
 	
 	/// The date the document was created.
-	///
 	/// This field is assigned manually. It's recommended to assign a new `Date()` instance.
 	var createdAt: Date { get }
 }
@@ -76,15 +76,15 @@ extension FDocument {
 extension FDocument {
 	
 	/**
-	 Sets the document in Firestore.
+	 Writes the document to Firestore.
 	 
-	 Documents are automatically stored in collections based on their type.
+	 Documents are automatically stored in collections named the same as their type.
 	 
-	 If the document to be `written` has the same ID as an existing document in a collection, the old document will be overwritten.
+	 If the document to be written has the same ID as an existing document in a collection, the old document will be overwritten.
 	 */
 	public func `write`() async throws {
 		do {
-			try await Firappuccino.Write.`write`(self)
+			try await Firappuccino.Writer.`write`(self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -93,45 +93,17 @@ extension FDocument {
 	}
 	
 	/**
-	 Updates a specific field remotely in Firestore.
-	 
-	 - parameter path: The path to the field to update remotely.
-	 */
-	
-	/// Sets a specific field of a document remotely in Firestore.
-	/// - Parameters:
-	///   - field: The name of the field
-	///   - path: The path to the document containing the field
-	///   - ofType: The `Type` of the document to be updated.
-	public func `write`<T, U>(using path: KeyPath<T, U>, ofType: T.Type) async throws where T: FDocument, U: Codable {
-		try await Firappuccino.Write.`write`(to: path, in: self as! T)
-	}
-	
-	
-	/**
-	 Updates a specific field with a new value both locally and remotely in Firestore.
+	 Writes a value to a document field located at the specified keyPath.
 	 
 	 - parameter value: The new value.
-	 - parameter path: The path to the field to update.
+	 - parameter path: The keyPath to the field.
 	 */
-//	public func `write`<T>(field: FieldName, with value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
+	public mutating func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
 //		var _self = self
 //		_self[keyPath: path] = value
-//		//FIXME: - refactor out `fieldName`
-//		do {
-//			try await Firappuccino.Write.`write`(field: field, with: value, using: path, in: _self)
-//		}
-//		catch let error as NSError {
-//			Firappuccino.logger.error("\(error.localizedDescription)")
-//		}
-//	}
-	
-	public func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
-		var _self = self
-		_self[keyPath: path] = value
-		//FIXME: - refactor out `fieldName`
+		self[keyPath: path] = value
 		do {
-			try await Firappuccino.Write.`write`(value: value, using: path, in: self)
+			try await Firappuccino.Writer.`write`(value: value, using: path, in: self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -139,20 +111,20 @@ extension FDocument {
 	}
 	
 	/**
-	 Increments a specific field remotely in Firestore.
+	 Increments a specific field in an FDocument.
 	 
 	 - parameter path: The path to the field to update.
 	 - parameter increment: The amount to increment by.
-	 - parameter completion: The completion handler.
 	 */
-	public func increment<T>(_ path: WritableKeyPath<Self, T>, by increment: T) async throws where T: AdditiveArithmetic {
+	public mutating func increment<T>(_ path: WritableKeyPath<Self, T>, by increment: T) async throws where T: AdditiveArithmetic {
 		do {
 			var fieldValue = self[keyPath: path]
 			if let incrementAmount = increment as? Int {
-				try await Firappuccino.Stride.increment(path.string, by: incrementAmount, in: self)
+				try await Firappuccino.Counter.increment(path.string, by: incrementAmount, in: self)
 				fieldValue.add(increment)
-				var _self = self
-				_self[keyPath: path] = fieldValue
+				self[keyPath: path] = fieldValue
+//				var _self = self
+//				_self[keyPath: path] = fieldValue
 			}
 		}
 		catch let error as NSError {
@@ -163,15 +135,12 @@ extension FDocument {
 	}
 	
 	/**
-	 Gets the most up-to-date value from a specified path.
+	 Asynchronously fetch the most up-to-date document field value from a specified keyPath.
 	 
-	 - parameter path: The path to the field to retrieve.
-	 - parameter completion: The completion handler.
-	 
-	 If you don't want to update the entire object, and instead you just want to fetch a particular value, this method may be helpful.
+	 - parameter path: The keyPath to the field.
 	 */
 	public func `fetch`<T>(_ path: KeyPath<Self, T>) async throws -> T? where T: Codable {
-		guard let document = try await Firappuccino.Fetch.`fetch`(id: self.id, ofType: Self.self) else { return nil }
+		guard let document = try await Firappuccino.Fetcher.`fetch`(id: self.id, ofType: Self.self) else { return nil }
 		return document[keyPath: path]
 		
 	}
@@ -179,28 +148,18 @@ extension FDocument {
 	
 	/// Assigns the specified "child" `FDocument`'s ID to a collection of DocumentIDs in a "parent" `FDocument` document in Firestore.
 	/// - Parameters:
-	///   - field: The name of the "target" field in the parent `FDocument`.
 	///   - path: The path to the `field` of `DocumentID`s in the parent `FDocument`.
 	///   - parent: The parent `FDocument` containing the field of `DocumentID`s
+	///
 	///   - remark: If `draftPosts` is a property of a `FUser` object  instance, calling
-	///   ```post.assign(to: \.draftPosts, in: user)```
+	///   ``post.relate(to: \.draftPosts, in: user)``
 	///   will add the `post`'s ID to `users`'s `draftPosts`.
 	///  - important: Fields will not be updated locally using this method.
-//	public func `link`<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
-//
-//		do {
-//			try await Firappuccino.Relate.`link`(self, toField: field, using: path, in: parent)
-//		}
-//		catch let error as NSError {
-//			Firappuccino.logger.error("\(error.localizedDescription)")
-//			throw error
-//		}
-//	}
 	
-	public func `link`<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	public func `relate`<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		
 		do {
-			try await Firappuccino.Relate.`link`(self, using: path, in: parent)
+			try await Firappuccino.Relator.`relate`(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -215,50 +174,29 @@ extension FDocument {
 	///   - path: path description
 	///   - parent: parent description
 
-	public func writeAndLink<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	public func writeAndRelate<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.Write.writeAndLink(self, using: path, in: parent)
+			try await Firappuccino.Writer.writeAndLink(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 		}
 	}
-//	public func writeAndLink<T>(toField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
-//		do {
-//			try await Firappuccino.Write.writeAndLink(self, toField: field, using: path, in: parent)
-//		}
-//		catch let error as NSError {
-//			Firappuccino.logger.error("\(error.localizedDescription)")
-//			throw error
-//		}
-//	}
-	
 	
 	/// Unassigns the document's ID from a related list of IDs in another document.
 	/// - Parameters:
-	///   - field: field description
 	///   - path: path description
 	///   - parent: parent description
 
-	public func unlink<T>(using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	public func unlink<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.Relate.`unlink`(self, using: path, in: parent)
+			try await Firappuccino.Relator.`unrelate`(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 		}
 	}
-	
-//	public func unlink<T>(fromField field: FieldName, using path: KeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
-//		do {
-//			try await Firappuccino.Relate.`unlink`(self, fromField: field, using: path, in: parent)
-//		}
-//		catch let error as NSError {
-//			Firappuccino.logger.error("\(error.localizedDescription)")
-//			throw error
-//		}
-//	}
 }
 

@@ -9,16 +9,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		
 		// Use Legacy Messaging API
 		Configurator.useLegacyMessaging = true
-		Configurator.legacyMessagingAPIKey = "AAAAAlm70VY:APA91bHReDsmGJIIO2eP1s7ss10mjOzhDGUb0fVIEENPW3s0twlrhhJ64mGSgwnqvLkHGk7BkJkLa9B1_IT6nsUBO58VjvbYTMQtvgrKOHvylFOqbigHOZjbRt2LNbUfoS1zvE1Zv6t4"
+		Configurator.legacyMessagingAPIKey = AppConstants.legacyMessagingAPIKey
+		// Turn off local fCache
+//		Configurator.useCache = false
 		
-		// Turn off local cache
-		Configurator.useCache = false
-			
 		// Configurate
 		Configurator.configurate(WithOptions: nil, globalOverrideLogLevel: Logger.Level.error)
-
+		
 		// for debug
-//				UserDefaults.standard.set(false, forKey: Constants.userDefaults.didWalkThroughKey)
+						UserDefaults.standard.set(false, forKey: AppConstants.userDefaults.didWalkThroughKey)
 		return true
 	}
 }
@@ -38,21 +37,33 @@ struct ExampleApp: App {
 			.environmentObject(postService)
 			.onAppear {
 				FAuth.onAuthStateChanged(ofType: ExampleFUser.self) { user in
-					guard let user = user, !user.isDummy else { return }
-					if authService.isSigningUp == true {
-						user.progress = 0
-						user.firstName = authService.currentUser.displayName
-						user.lastName = String(authService.currentUser.displayName.reversed())
-						
+					guard var user = user, !user.isDummy else { return }
+					if authService.isSignupComplete == false {
 						Task {
-							try await user.updateDisplayName(to: "\(user.firstName) \(user.lastName)", ofUserType: ExampleFUser.self)
+							user.progress = 0
+							user.firstName = authService.firstName
+							user.lastName = authService.lastName
+							
+							try? await user.updateDisplayName(to: user.firstName, ofUserType: ExampleFUser.self)
+							
+							try await user.writeAndIndex()
+							
+							authService.currentUser = user
+							authService.firstName = ""
+							authService.lastName = ""
+							authService.isSignupComplete = true
 						}
 					}
-					authService.currentUser = user
-					authService.isSigningUp = false
+					else {
+						authService.currentUser = user
+					}
+					
+					//Legacy FPN Messaging
 					if let userId = Auth.auth().currentUser?.uid {
 						authService.pushManager = LegacyFPNManager(userID: userId)
-						authService.pushManager?.registerForPushNotifications()
+						Task {
+							try? await authService.pushManager?.registerForPushNotifications()
+						}
 					}
 					return
 				}

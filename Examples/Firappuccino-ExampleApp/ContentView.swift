@@ -12,13 +12,12 @@ struct ContentView: View {
 			}
 			else {
 				MainView()
-				// NOTE: Add services here
 					.environmentObject(ExamplePostsService())
 					.environmentObject(ExampleAuthService.currentSession)
 			}
 		}
 		.transition(.slide)
-		.animation(.easeInOut)
+		//		.animation(.easeInOut)
 		
 	}
 }

@@ -6,8 +6,8 @@ struct AuthForm: View {
 	@EnvironmentObject var authService: ExampleAuthService
 	
 	@State var email: String = ""
-	@State var firstName: String = ""
-	@State var lastName: String = ""
+	@Binding var firstName: String
+	@Binding var lastName: String
 	@State var password: String = ""
 	@State var passwordConf: String = ""
 	@State var isShowingPassword = false
@@ -17,10 +17,12 @@ struct AuthForm: View {
 	var body: some View {
 		ZStack {
 			VStack(spacing: 16) {
+				
 				TextField("Email", text: $email)
 					.textContentType(.emailAddress)
 					.keyboardType(.emailAddress)
 					.autocapitalization(.none)
+				
 				if authType == .signup {
 					TextField("First Name", text: $firstName)
 						.textContentType(.givenName)
@@ -32,11 +34,13 @@ struct AuthForm: View {
 						.keyboardType(.namePhonePad)
 						.autocapitalization(.words)
 				}
+				
 				if isShowingPassword {
 					TextField("Password", text: $password)
 						.textContentType(.password)
 						.autocapitalization(.none)
-				} else {
+				}
+				else {
 					SecureField("Password", text: $password)
 				}
 				
@@ -46,7 +50,8 @@ struct AuthForm: View {
 						TextField("Password Confirmation", text: $passwordConf)
 							.textContentType(.password)
 							.autocapitalization(.none)
-					} else {
+					}
+					else {
 						SecureField("Password Confirmation", text: $passwordConf)
 					}
 				}
@@ -74,8 +79,8 @@ struct AuthForm: View {
 			.textFieldStyle(RoundedBorderTextFieldStyle())
 			.frame(width: 288)
 			.alert(item: $authService.error) { error in
-									Alert(title: Text("Error"), message: Text(error.localizedDescription))
-					}
+				Alert(title: Text("Error"), message: Text(error.localizedDescription))
+			}
 		}
 	}
 	
@@ -91,7 +96,7 @@ struct AuthForm: View {
 				
 			case .signup:
 				do {
-					try authService.signup(email: email, firstName: firstName, lastName: lastName, password: password, passwordConfirmation: passwordConf)
+					try await authService.signup(email: email, firstName: firstName, lastName: lastName, password: password, passwordConfirmation: passwordConf)
 				}
 				catch let error as NSError {
 					Firappuccino.logger.error("\(error.localizedDescription)")

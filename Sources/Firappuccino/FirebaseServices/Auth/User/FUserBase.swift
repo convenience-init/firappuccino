@@ -5,36 +5,43 @@ import FirebaseMessaging
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
+public final class KeyPathable: FieldNameReferenceable {
+	public static var fieldNames: [PartialKeyPath<KeyPathable> : String] {
+		[:]
+	}
+}
+
 open class FUserBase: NSObject, FUser {
 	
 	public var index: Int?
 	
-	public var id: String
+	@objc public var id: String
 	
-	public var createdAt: Date
+	@objc public var createdAt: Date
 	
-	public var notifications: [FPNMessage] = []
+	@objc public var notifications: [FPNMessage] = []
 	
-	public var disabledMessageCategories: [FPNMessageCategory] = []
+	@objc public var disabledMessageCategories: [FPNMessageCategory] = []
 	
-	public var progress: Int = -1
+	@objc public var progress: Int = -1
 	
-	public var deviceToken: String?
+	@objc public var deviceToken: String?
 	
-	public var appVersion: String
+	@objc public var appVersion: String
 	
-	public var lastSignon: Date
+	@objc public var lastSignon: Date
 	
-	public var email: String
+	@objc public var email: String
 	
-	public var profileImageURL: String?
+	@objc public var profileImageURL: String?
 	
-	public var username: String
+	@objc public var username: String
 	
 	public var displayName: String
 	
 	required public override init() {
 		id = "dummy"
+		index = -1
 		createdAt = Date()
 		deviceToken = ""
 		appVersion = Bundle.versionString
@@ -45,3 +52,5 @@ open class FUserBase: NSObject, FUser {
 		profileImageURL = ""
 	}
 }
+
+extension FUserBase: Identifiable {}

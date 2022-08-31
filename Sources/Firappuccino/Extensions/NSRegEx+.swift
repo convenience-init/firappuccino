@@ -1,6 +1,5 @@
 import Foundation
 
-
 extension NSRegularExpression {
 	
 	internal func stringByReplacingMatches(in string: String, withTemplate template: String) -> String {

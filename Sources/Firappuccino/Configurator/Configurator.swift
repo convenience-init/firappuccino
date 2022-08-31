@@ -31,11 +31,5 @@ public struct Configurator {
 		LoggingSystem.bootstrap(FOSLog.init)
 		FOSLog.overrideLogLevel = globalOverrideLogLevel
 		
-		//Legacy Messaging
-			/*
-			 
-			 let pushManager = LegacyPushNotificationManager(userID: "cyJCfb195ZhJtFzU47OcMC3ezNC3")
-			 pushManager.registerForPushNotifications()
-			 */		
 	}
 }

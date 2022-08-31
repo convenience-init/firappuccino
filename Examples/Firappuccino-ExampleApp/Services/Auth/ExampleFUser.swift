@@ -3,8 +3,8 @@ import Firappuccino
 
 class ExampleFUser: FUserBase {
 	
-	var firstName: String = ""
-	var lastName: String = ""
+	@objc var firstName: String = ""
+	@objc var lastName: String = ""
 	@objc var totalLikesReceived: Int = 0
 	
 	enum CodingKeys: String, CodingKey {

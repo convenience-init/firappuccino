@@ -1,8 +1,9 @@
 import Foundation
 
-extension KeyPath {
+extension WritableKeyPath {
 	
-	 var string: String {
+	var string: String {
 		NSExpression(forKeyPath: self).keyPath
 	}
 }
+

@@ -8,7 +8,7 @@ public typealias FAnalyticsUserPropertyKey = String
 
 public protocol FAnalyticsParams {
 
-	/// Convenience method to
+	/// Convenience method
 	/// - Returns: A dictionary containing the `FAnalytics` data to send to Firebase
 	func toModel(properties: Any ...) -> [String: Any]
 }
@@ -39,7 +39,7 @@ FAnalytics.log("post", data: [
  
  User Properties are automatically updated when a local `FUser` instance is initialized. For more information, see the documentation for ``FUser``'s `analyticsProperties()` method.
  
- - Remark:  No data collected by `FAnalytics` is linked to a specific user, and no user data are intentionally collected. If you wish to link analytics data to a specific user, call `FAnalytics.setUserId(_:)` first.
+ - Remark:  No data collected by `FAnalytics` is linked to a specific user, and no user data are intentionally collected. If you wish to `relate` analytics data to a specific user, call `FAnalytics.setUserId(_:)` first.
  */
 public struct FAnalytics {
 

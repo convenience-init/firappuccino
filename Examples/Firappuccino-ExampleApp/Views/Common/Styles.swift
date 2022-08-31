@@ -20,7 +20,7 @@ extension Color {
 
 extension Font {
 	static let header: Font = .custom("Inter-Medium", size: 19)
-	//    static let sectionFooter: Font = Font.footer.italic()
+//	static let sectionFooter: Font = Font.footer.italic()
 	static let body: Font = .custom("Inter-Medium", size: 16)
 	static let small: Font = .custom("Inter-Medium", size: 14)
 	static let bigFont: Font = .custom("Inter-Medium", size: 28)
@@ -151,12 +151,6 @@ struct XCAButtonStyle: ButtonStyle {
 			.cornerRadius(8)
 	}
 }
-
-//struct StylesView_Previews: PreviewProvider {
-//	static var previews: some View {
-//		StylesView()
-//	}
-//}
 
 struct DismissingKeyboard: ViewModifier {
 	func body(content: Content) -> some View {

@@ -9,18 +9,22 @@ struct ExamplePostRow: View {
 			HStack(alignment: .top, spacing: 16) {
 				profilePicture
 				VStack(alignment: .leading, spacing: 2) {
+					
 					Text(postService.examplePost.title)
 						.font(.title2.weight(.bold))
 						.lineLimit(1)
 						.foregroundColor(.white)
+					
 					Text(postService.examplePost.message)
 						.font(.subheadline.weight(.bold))
 						.lineLimit(3)
 						.foregroundColor(.white)
+					
 					Text("submitted by: \(postService.examplePost.submittingUserDisplayName)")
 						.font(.footnote)
 						.foregroundColor(.white)
 						.opacity(0.7)
+					
 					Text("\(postService.examplePost.likes) Likes")
 						.font(.caption2.weight(.bold))
 						.lineLimit(1)

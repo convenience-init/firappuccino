@@ -10,12 +10,12 @@ extension Firappuccino {
 	/**
 	 A service for listening to data updates on both individual and collections of documents.
 	 */
-	public struct Listen {
+	public struct Listener {
 		
 		private static var listeners: [ListenerKey: [ListenerRegistration?]] = [:]
-		
+		// TODO: Convert to async/await
 		///Listen to a collection of documents
-		public static func listen<T>(to collectionOfType: T.Type, key: ListenerKey, onUpdate: @escaping ([T]?) -> Void) where T: FDocument {
+		public static func `listen`<T>(to collectionOfType: T.Type, key: ListenerKey, onUpdate: @escaping ([T]?) -> Void) where T: FDocument {
 			let listener = db.collection(colName(of: T.self)).addSnapshotListener { snapshot, error in
 				if let error = error {
 					Firappuccino.logger.error("No collection named [\(colName(of: T.self))] could be found. \(error.localizedDescription)")
@@ -34,7 +34,7 @@ extension Firappuccino {
 			registerListener(listener, key: key)
 		}
 		
-		public static func listen<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey, onUpdate: @escaping (T?) -> Void) where T: FDocument {
+		public static func `listen`<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey, onUpdate: @escaping (T?) -> Void) where T: FDocument {
 			let listener = db.collection(colName(of: T.self)).document(id).addSnapshotListener { snapshot, _ in
 				guard let snapshot = snapshot, snapshot.exists else {
 					Firappuccino.logger.error("A document with ID [\(id)] loaded from the [\(colName(of: T.self))] collection, but no data could be found.")

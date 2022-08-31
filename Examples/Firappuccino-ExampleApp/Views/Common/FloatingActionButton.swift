@@ -63,8 +63,10 @@ extension View {
 		color: Color,
 		image: ImageView,
 		action: @escaping () -> Void) -> some View {
-			self.modifier(FloatingActionButtonModifier(color: color,
-													   image: image,
-													   action: action))
+			self.modifier(FloatingActionButtonModifier(
+				color: color,
+				image: image,
+				action: action)
+			)
 		}
 }

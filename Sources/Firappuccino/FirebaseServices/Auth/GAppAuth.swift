@@ -5,7 +5,7 @@
 import UIKit
 /// Wrapper class that provides convenient AppAuth functionality with Google Services.
 /// Set `ClientId`, `RedirectUri` and call respective methods where you need them.
-/// Requires dependency to ``GTMAppAuth``, see: https://github.com/google/GTMAppAuth
+/// Requires dependency to GTMAppAuth, see: https://github.com/google/GTMAppAuth
 public final class GAppAuth: NSObject {
 	
 	private static let KeychainPrefix   = Bundle.main.bundleIdentifier!

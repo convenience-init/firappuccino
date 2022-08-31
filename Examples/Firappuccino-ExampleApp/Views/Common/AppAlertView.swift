@@ -26,19 +26,19 @@ struct ActionSheetModifier: ViewModifier {
 
 class AppAlertView: ObservableObject {
 	
-	// MARK: Published
+	// Published
 	@Published var showAlertView : Bool = false
 	@Published var showActionSheet : Bool = false
 	
-	// MARK: Properties
+	// Private
 	private var title : String = ""
 	private var message : String = ""
 	
 	private var primaryCompletion: (buttonName: String, closure: (() -> ())) = ("", {})
 	private var secondaryCompletion: (buttonName: String, closure: (() -> ())) = ("", {})
-	private var dissmissCompletion: (buttonName: String, closure: (() -> ())) = ("", {})
+	private var dismissCompletion: (buttonName: String, closure: (() -> ())) = ("", {})
 	
-	//MARK:- Default Alert View
+	// Default Alert View
 	func showAlertView(title: String = "",
 					   message: String,
 					   primaryCompletion: (buttonName: String, closure: (() -> ())),
@@ -56,7 +56,7 @@ class AppAlertView: ObservableObject {
 		self.showAlertView(title: title, message: message, primaryCompletion: primaryCompletion, secondaryCompletion: ("", {}))
 	}
 	
-	// MARK: A representation for an alert presentation.
+	// Alert presentation
 	var getSystemAlert: Alert {
 		
 		let primaryButton = Alert.Button.default(Text(primaryCompletion.buttonName)) {
@@ -74,7 +74,7 @@ class AppAlertView: ObservableObject {
 		return Alert(title: Text(title), message: Text(message), dismissButton: primaryButton)
 	}
 	
-	//MARK:- Action Sheet
+	// Action Sheet
 	func showActionSheet(title: String,
 						 message: String = "",
 						 primaryCompletion: (buttonName: String, closure: (() -> ())),
@@ -84,7 +84,7 @@ class AppAlertView: ObservableObject {
 		self.message = message
 		self.primaryCompletion = primaryCompletion
 		self.secondaryCompletion = secondaryCompletion
-		self.dissmissCompletion = dissmissCompletion
+		self.dismissCompletion = dissmissCompletion
 		self.showActionSheet = true
 	}
 	
@@ -98,8 +98,8 @@ class AppAlertView: ObservableObject {
 			self.secondaryCompletion.closure()
 		}
 		
-		let action3 = ActionSheet.Button.cancel(Text(dissmissCompletion.buttonName)) {
-			self.dissmissCompletion.closure()
+		let action3 = ActionSheet.Button.cancel(Text(dismissCompletion.buttonName)) {
+			self.dismissCompletion.closure()
 		}
 		
 		return ActionSheet(title: Text(title), message: Text(message), buttons: [action1, action2, action3])

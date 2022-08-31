@@ -1,4 +1,3 @@
-import Foundation
 
 extension Array where Element: Hashable {
 	func addUnique(array: Array) -> Array {

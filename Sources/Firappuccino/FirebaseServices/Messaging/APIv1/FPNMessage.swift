@@ -12,7 +12,7 @@
 public typealias FPNMessageCategory = String
 
 
-/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app. This Service uses the V1 API, as the Legacy API's deprecation is looming. Until then, feel free to use the more lightweight 
+/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app. This Service uses the V1 API, as the Legacy API's deprecation is looming. Until then, feel free to use the `LegacyFPNManager` and `LegacyFPNSender`
 ///
 /// "*FUser X* liked your content *XXX*!"
 ///
@@ -24,7 +24,7 @@ public typealias FPNMessageCategory = String
 ///	````
 ///	FPNMessaging.sendNotificationTo<T>(to:title:body:data:)
 ///	````
-public class FPNMessage: FModel {
+public class FPNMessage: NSObject, FModel {
 	
 	/// The date of the notification.
 	public var date: Date = Date()
@@ -40,11 +40,11 @@ public class FPNMessage: FModel {
 	public var category: FPNMessageCategory
 	
 	/// The user that this notification came from.
-	public var user: DocumentID?
+	@objc public var user: DocumentID?
 	
 	
 	/// The title of the notification.
-	/// - Note: if none is specified, an empty `String` is passed and ``FirebaseMessaging`` defaults (your project/app name) will be used.
+	/// - Note: if none is specified, an empty `String` is passed and FirebaseMessaging defaults (your project/app name) will be used.
 	public var title: String
 	
 	/** The notification message's body text.
@@ -56,7 +56,7 @@ public class FPNMessage: FModel {
 	/// The body of the push notification.
 	public var pushBody: String
 	
-	/// The attached image URL `String` for the notification. If not passed a value, ``FirebaseMessaging`` default will be used.
+	/// The attached image URL `String` for the notification. If not passed a value, Firebase Messaging default will be used.
 	public var image: String?
 	
 	/// Whether the notification has been read
@@ -80,7 +80,7 @@ public class FPNMessage: FModel {
 	}
 }
 
-extension FPNMessage: Equatable {
+extension FPNMessage {
 	public static func == (lhs: FPNMessage, rhs: FPNMessage) -> Bool {
 		return lhs.messageBody == rhs.messageBody && (lhs.date.distance(to: rhs.date)) < TimeInterval(5 * 60)
 	}

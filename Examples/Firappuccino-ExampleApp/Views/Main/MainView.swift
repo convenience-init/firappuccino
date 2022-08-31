@@ -8,16 +8,16 @@ struct MainView: View {
 	var body: some View {
 		Group {
 			if let _ = Auth.auth().currentUser {
-					MainTabView()
-				.environmentObject(authService)
-				.environmentObject(postsService)
+				MainTabView()
+					.environmentObject(authService)
+					.environmentObject(postsService)
 			}
 			else {
 				AuthView(authType: .login)
-				.environmentObject(authService)
+					.environmentObject(authService)
 			}
 		}
-		.animation(.easeInOut)
+		//		.animation(.easeInOut)
 		.transition(.move(edge: .bottom))
 		.preferredColorScheme(.dark)
 	}

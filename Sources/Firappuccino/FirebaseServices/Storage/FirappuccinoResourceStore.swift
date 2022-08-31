@@ -9,7 +9,7 @@ import FirebaseStorageSwift
  To use `FirappuccinoResourceStore`, check out the following methods:
  
  - `put(_:to:progress:)` to store resource data in Firebase Storage.
- - `delete(_:)` to remove resoure data from Firebase Storage.
+ - ``destroy`(_:)` to `destroy` resoure data from Firebase Storage.
  */
 public struct FirappuccinoResourceStore {
 	
@@ -37,7 +37,6 @@ public struct FirappuccinoResourceStore {
 	 Removes a resource from Firebase Storage.
 	 
 	 - parameter resource: Information about the location of the resource in Firebase Storage.
-	 - parameter completion: The completion handler.
 	 */
 	@discardableResult
 	@MainActor public static func delete(_ resource: FirappuccinoStorageResource) async -> Bool {

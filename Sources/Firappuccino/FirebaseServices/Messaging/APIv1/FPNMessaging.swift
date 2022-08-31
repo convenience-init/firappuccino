@@ -5,10 +5,10 @@ import SwiftJWT
 
 public struct FPNMessaging {
 	
-	/// The Relative `URL` `String` path of the ``Google Service Account`` private `._key` file
+	/// The Relative `URL` `String` path of the Google Service Account`` private `._key` file
 	public static var privateKeyFilePath: String = ""
 	
-	/// The Relative `URL` `String` path of the ``Google Service Account`` public `.key` file
+	/// The Relative `URL` `String` path of the Google Service Account public `.key` file
 	public static var publicKeyFilePath: String = ""
 	
 	/// The `String` value of issuer property of a `MessageClaim`
@@ -88,10 +88,12 @@ public struct FPNMessaging {
 	public static func sendLegacyUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
 		
 		do {
-			//FIXME: - Use a category enum and an `allCases` computed property
+			//TODO: - `CaseIteratable` category enum
 			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
+			// Legacy API
 			try await Firappuccino.sender.send(message, to: recipient, data: ["count": recipient.notifications.filter({ !$0.read }).count])
-//			try await FPNMessaging.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
+			// v1 API
+			//			try await FPNMessaging.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

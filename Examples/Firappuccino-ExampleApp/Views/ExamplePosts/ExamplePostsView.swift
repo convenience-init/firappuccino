@@ -14,7 +14,7 @@ struct ExamplePostsView: View {
 				HStack {
 				}
 				ExamplePostsRandomAccessListView(postServices: postsService.postServices)
-
+				
 				TextFieldAlertView(
 					text: $text,
 					messageText: $messageText,

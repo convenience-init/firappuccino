@@ -8,7 +8,7 @@ struct TextFieldAlertView: UIViewControllerRepresentable {
 	
 	let placeholder: String
 	let placeholder2: String
-	//    let isSecureTextEntry: Bool
+//	let isSecureTextEntry: Bool
 	let title: String
 	let message: String
 	
@@ -39,14 +39,14 @@ struct TextFieldAlertView: UIViewControllerRepresentable {
 			textField.placeholder = placeholder
 			textField.text = text
 			textField.delegate = context.coordinator
-			//            textField.isSecureTextEntry = isSecureTextEntry
+//			textField.isSecureTextEntry = isSecureTextEntry
 		}
 		
 		alert.addTextField { textField in
 			textField.placeholder = placeholder2
 			textField.text = text
 			textField.delegate = context.coordinator
-			//            textField.isSecureTextEntry = isSecureTextEntry
+//			textField.isSecureTextEntry = isSecureTextEntry
 		}
 		
 		if leftButtonTitle != nil {

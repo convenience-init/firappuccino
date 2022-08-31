@@ -6,9 +6,9 @@ extension Firappuccino {
 	/**
 	 A service for querying Firestore data.
 	 */
-	public struct FQuery {
+	public struct Querier {
 		
-		public typealias QueryConditionBlock<T, U> = (KeyPath<T, U>, QueryCondition<T, U>.Comparison, U)
+		public typealias QueryConditionBlock<T, U> = (WritableKeyPath<T, U>, QueryCondition<T, U>.Comparison, U)
 		
 		/**
 		 FQuery a collection of documents, matching the given condition.
@@ -16,7 +16,7 @@ extension Firappuccino {
 		 Use the `path` argument to specify the collection to query. For instance, if you have a collection of `FUser` objects, and you want to search for users matching the `displayName` of `"Atreyu"`, you can query like so:
 		 
 		 ```
-		 Firappuccino.FQuery.`queryWhere`(\MyUser.displayName, .equals, "Atreyu") { users in
+		 Firappuccino.Querier.`queryWhere`(\MyUser.displayName, .equals, "Atreyu") { users in
 		 // ...
 		 }
 		 ```
@@ -27,7 +27,7 @@ extension Firappuccino {
 		 - parameter order: The way the documents are ordered. This will always order by the field provided in the `path` parameter.
 		 - parameter limit: The maximum amount of documents to query.
 		 */
-		public static func wherePath<T, U>(_ path: KeyPath<T, U>, _ comparison: QueryCondition<T, U>.Comparison, _ value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
+		public static func wherePath<T, U>(_ path: WritableKeyPath<T, U>, _ comparison: QueryCondition<T, U>.Comparison, _ value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
 			await whereCondition(QueryCondition(path: path, comparison: comparison, value: value), order: order, limit: limit)
 		}
 		
@@ -38,7 +38,7 @@ extension Firappuccino {
 		 
 		 
 		 ```
-		 let users = try await Firappuccino.FQuery.`queryWhere`(
+		 let users = try await Firappuccino.Querier.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.createdAt, .lessThan, Date())
 		 )
@@ -47,7 +47,7 @@ extension Firappuccino {
 		 - note: If you are passing `order: .ascending` or `order: .descending` as an argument, ensure that your *first* `QueryConditionBlock` constrains the field you want to have ordered.
 		 
 		 ````
-		 let users = try await Firappuccino.FQuery.`queryWhere`(
+		 let users = try await Firappuccino.Querier.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.createdAt, .lessThan, Date()),
 		 order: .ascending, limit: 8
@@ -112,7 +112,7 @@ extension Firappuccino {
 		public struct QueryCondition<T, U> {
 			
 			/// The path of the field to query.
-			public var path: KeyPath<T, U>
+			public var path: WritableKeyPath<T, U>
 			/// The comparison used to filter a query.
 			public var comparison: Comparison
 			/// The value to check.

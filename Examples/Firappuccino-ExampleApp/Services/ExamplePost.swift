@@ -7,12 +7,12 @@ class ExamplePost: NSObject, FDocument {
 	var createdAt: Date = Date()
 	
 	// Custom properties
-	var userId: String = ""
-	var submittingUserDisplayName = ""
-	var imageURL: URL = URL(string: "https://source.unsplash.com/random/?guineapig")!
-	var updatedAt: Date = Date()
-	var title: String = ""
-	var message: String = ""
+	@objc var userId: String = ""
+	@objc var submittingUserDisplayName = ""
+	@objc var imageURL: URL = URL(string: "https://source.unsplash.com/random/?guineapig")!
+	@objc var updatedAt: Date = Date()
+	@objc var title: String = ""
+	@objc var message: String = ""
 	@objc var likes: Int = 0
 	@objc var likedByUserIds: [DocumentID] = []
 	
@@ -22,14 +22,6 @@ class ExamplePost: NSObject, FDocument {
 		self.title = title
 		self.message = message
 	}
-//	func incrementLikes() async throws {
-//		do {
-//			try await Firappuccino.Stride.increment(\.likes, by: 1, in: self)
-//		}
-//		catch let error as NSError {
-//			Firappuccino.logger.error("\(error.localizedDescription)")
-//		}
-//	}
 	
 	static func == (lhs: ExamplePost, rhs: ExamplePost) -> Bool {
 		return lhs.id == rhs.id

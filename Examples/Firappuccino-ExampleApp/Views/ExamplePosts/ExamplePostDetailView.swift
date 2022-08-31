@@ -7,15 +7,52 @@ struct ExamplePostDetailView: View {
 	
 	var body: some View {
 		ZStack(alignment: .top) {
-			HStack(alignment: .top, spacing: 16) {
-				
-				postImage
-				
-				Divider()
-				.padding()
+			HStack(alignment: .center, spacing: 16) {
+				VStack(alignment: .center, spacing: 6){
+					Spacer()
+					postImage
+					
+					Divider()
+						.padding()
+					
+					VStack(alignment: .leading, spacing: 6) {
+												
+						Text("Likes")
+							.font(.title3.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.appCard)
+						Text(String(postService.examplePost.likes))
+							.font(.headline.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.white)
+							.padding([.bottom], 12)
+						
+						Text("Posted by")
+							.font(.title3.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.appCard)
+						Text(postService.examplePost.submittingUserDisplayName)
+							.font(.headline.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.white)
+							.padding([.bottom], 12)
+						
+						Text("Posted at")
+							.font(.title3.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.appCard)
+						Text(postService.examplePost.createdAt.formatted())
+							.font(.headline.weight(.bold))
+							.lineLimit(3)
+							.foregroundColor(.white)
+							.padding([.bottom], 12)
+						Spacer()
+					}
+//					Spacer()
+				}
 				
 				VStack(alignment: .leading, spacing: 6) {
-					
+					Spacer()
 					Text("Post Title")
 						.font(.title3.weight(.bold))
 						.lineLimit(3)
@@ -26,6 +63,8 @@ struct ExamplePostDetailView: View {
 						.foregroundColor(.white)
 						.padding([.bottom], 12)
 					
+					Spacer()
+					
 					Text("Post Message")
 						.font(.title3.weight(.bold))
 						.lineLimit(3)
@@ -34,36 +73,7 @@ struct ExamplePostDetailView: View {
 						.font(.headline.weight(.bold))
 						.foregroundColor(.white)
 						.padding([.bottom], 12)
-					
-					Text("Likes")
-						.font(.title3.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.appCard)
-					Text(String(postService.examplePost.likes))
-						.font(.headline.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.white)
-						.padding([.bottom], 12)
-					
-					Text("Posted by")
-						.font(.title3.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.appCard)
-					Text(postService.examplePost.submittingUserDisplayName)
-						.font(.headline.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.white)
-						.padding([.bottom], 12)
-					
-					Text("Posted at")
-						.font(.title3.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.appCard)
-					Text(postService.examplePost.createdAt.ISO8601Format())
-						.font(.headline.weight(.bold))
-						.lineLimit(3)
-						.foregroundColor(.white)
-						.padding([.bottom], 12)
+					Spacer()
 				}
 			}
 			.frame(minWidth: 242 , maxWidth: 282, minHeight: 420, maxHeight: 666, alignment: .top)
@@ -75,7 +85,7 @@ struct ExamplePostDetailView: View {
 			Spacer()
 		}
 		.floatingActionButton(color: .white, image: Image(systemName: postService.examplePost.likedByUserIds.contains(authService.currentUser.id) ? "heart.fill" : "heart").foregroundColor(.red)) {
-				Task { try? await postService.like() }
+			Task { try? await postService.like() }
 		}
 	}
 	
@@ -106,7 +116,7 @@ struct ExamplePostDetailView: View {
 			.overlay(Circle().stroke(Color.white, lineWidth: 1))
 		}
 	}
-
+	
 }
 
 //struct ExamplePostDetailView_Previews: PreviewProvider {

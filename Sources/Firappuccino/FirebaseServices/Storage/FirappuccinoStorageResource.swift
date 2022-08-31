@@ -10,7 +10,7 @@ public typealias ResourcePath = String
  
  A `FirappuccinoStorageResource` contains the logic to "package" resources to be "attached" to a `FDocument` and uploaded to Firebase Storage, but are not intended to be uploaded themselves.
  */
-public class FirappuccinoStorageResource: FModel {
+public class FirappuccinoStorageResource: NSObject, FModel {
 	
 	/// The url of the resource.
 	public var url: URL?

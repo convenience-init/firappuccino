@@ -1,6 +1,6 @@
 /*
  Abstract:
- iOS implementation of a UIVisualEffectView's blur and vibrancy.
+ SwiftUI implementation of a UIVisualEffectView's blur and vibrancy.
  */
 
 import SwiftUI

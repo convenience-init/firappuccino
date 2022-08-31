@@ -71,9 +71,9 @@ public class FAuth: NSObject {
 	/// - Parameter credential: The appropriate `AuthCredential` for the desired authorization flow.
 	/// - Note: Do not call this method directly if using "SignIn with Apple" or "Google SignIn" - call the appropriate convenience methods,
 	///
-	///```signInWithApple()```,
-	///```signInWithGoogle(clientID:)```, or
-	///```signInWithGoogle(clientID:secret:)```
+	///````signInWithApple()````,
+	///````signInWithGoogle(clientID:)````, or
+	///````signInWithGoogle(clientID:secret:)````
 	/// instead.
 	public static func signIn(with credential: AuthCredential) async throws {
 		do {
@@ -87,7 +87,7 @@ public class FAuth: NSObject {
 	}
 	
 	/// Signs the currently logged-in `FUser` out of all services.
-	public static func signOut() throws {
+	public static func signOut() async throws {
 		//TODO: - badge count reset
 		
 		do {
@@ -111,8 +111,8 @@ public class FAuth: NSObject {
 		}
 		authHandle = auth.addStateDidChangeListener { _, user in
 			guard let user = user, let newUser = T.get(from: user), !newUser.isDummy else { return }
-			Firappuccino.Listen.stop(listenerKey)
-			Firappuccino.Listen.listen(to: newUser.id, ofType: T.self, key: listenerKey) { document in
+			Firappuccino.Listener.stop(listenerKey)
+			Firappuccino.Listener.`listen`(to: newUser.id, ofType: T.self, key: listenerKey) { document in
 				guard let document = document else {
 					action(newUser)
 					Task { try await newUser.`writeAndIndex`() }
@@ -129,8 +129,8 @@ public class FAuth: NSObject {
 	///   - forUserType: The user `Type` to query against.
 	/// - Returns: A `Bool`, `true` if the passed `username` is unique, `false` otherwise.
 	public static func isUsernameAvailable<T>(_ username: String, forUserType: T.Type) async throws -> Bool where T: FUser {
-		let path: KeyPath<T, String> = \.username
-		return try await Firappuccino.FQuery.wherePath(path, .equals, username).count<=0
+		let path: WritableKeyPath<T, String> = \.username
+		return try await Firappuccino.Querier.wherePath(path, .equals, username).count<=0
 	}
 	
 	/// Prepares GoogleAppAuth
@@ -203,11 +203,11 @@ public class FAuth: NSObject {
 #if os(iOS)
 extension FAuth {
 	
-	/// ``Google SignIn`` Authentication Flow (iOS)
+	/// The Google SignIn Authentication Flow (iOS)
 	/// - Parameter clientID: The `ClientID` for your project/app
 	/// - Throws: An `Error`
 	/// - Remark: If you have not yet created ClientID, go to the [Google Cloud Developer Console](https://console.cloud.google.com/apis/dashboard) > Credentials > Create Credentials > OAuth Client ID and create one for your iOS application.
-	/// - Important: Do not include the `apps.googleusercontent.com` portion of your `ClientID`. It should be strictly alphanumeric, and contain no punctuation except dashes, i.e. ```xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx```
+	/// - Important: Do not include the `apps.googleusercontent.com` portion of your `ClientID`. It should be strictly alphanumeric, and contain no punctuation except dashes, i.e. "xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 	public static func signInWithGoogle(clientID: String) async throws {
 		let _clientID = "\(clientID).apps.googleusercontent.com"
 		let redirectURI = "com.googleusercontent.apps.\(clientID):/oauthredirect"
@@ -344,7 +344,7 @@ extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPre
 	 }, onCompletion: { _ in })
 	 ```
 	 */
-	public static func signInWithApple() {
+	public static func signInWithApple() async throws {
 		let nonce = String.nonce()
 		shared.currentNonce = nonce
 		accountProvider = .apple
@@ -372,7 +372,7 @@ extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPre
 	}
 	
 	/**
-	 Handles a successful ``SignIn with Apple`` authorization flow.
+	 Handles a successful SignIn with Apple authorization flow.
 	 
 	 - important: It is not necessary to call this method, but you can override it to handle a success state on your own if you'd like.
 	 
@@ -410,7 +410,7 @@ extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPre
 	}
 	
 	/**
-	 Handles a failed ``SignIn with Apple`` authorization flow.
+	 Handles a failed SignIn with Apple authorization flow.
 	 
 	 - important:  It is not necessary to call this method, but you can override it to handle a failure state on your own if you'd like.
 	 

@@ -1,6 +1,4 @@
 import UIKit
-import Firebase
-import FirebaseFirestore
 import FirebaseMessaging
 import UserNotifications
 
@@ -13,20 +11,18 @@ public class LegacyFPNManager: NSObject, MessagingDelegate, UNUserNotificationCe
 		super.init()
 	}
 	
-	@MainActor public func registerForPushNotifications() {
-			UNUserNotificationCenter.current().delegate = self
-			let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-			UNUserNotificationCenter.current().requestAuthorization(
-				options: authOptions,
-				completionHandler: {_, _ in })
-
-			Messaging.messaging().delegate = self
-
+	@MainActor public func registerForPushNotifications() async throws {
+		UNUserNotificationCenter.current().delegate = self
+		let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+		try await UNUserNotificationCenter.current().requestAuthorization(options: authOptions)
+		
+		Messaging.messaging().delegate = self
+		
 		UIApplication.shared.registerForRemoteNotifications()
-		updateFirestorePushTokenIfNeeded()
+		try await updateFirestorePushTokenIfNeeded()
 	}
 	
-	func updateFirestorePushTokenIfNeeded() {
+	func updateFirestorePushTokenIfNeeded() async throws {
 		if let fcmToken = Messaging.messaging().fcmToken {
 			print("Firebase registration token: \(String(describing: fcmToken))")
 			
@@ -36,14 +32,16 @@ public class LegacyFPNManager: NSObject, MessagingDelegate, UNUserNotificationCe
 				object: nil,
 				userInfo: dataDict
 			)
-			
-//			let usersRef = Firestore.firestore().document(userID)
-//			usersRef.setData(["deviceToken": fcmToken], merge: true)
+			if var user = try? await Firappuccino.Fetcher.fetch(id: userID, ofType: FUserBase.self) {
+				try await user.write(value: fcmToken, using: \FUserBase.deviceToken)
+			}
 		}
 	}
 	
 	public func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-		updateFirestorePushTokenIfNeeded()
+		Task {
+			try? await updateFirestorePushTokenIfNeeded()
+		}
 	}
 	
 	public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
