@@ -1,22 +1,26 @@
 import Foundation
 import Firebase
+import FirebaseMessaging
 import Logging
 
 
+/// Configuration for Firappuccino and Firebase services
 public struct Configurator {
-	
-	// Cache
-	public static var useCache: Bool = true
 	
 	// Legacy Cloud Messaging API
 	public static var useLegacyMessaging = false
 	public static var legacyMessagingAPIKey = ""
 	
-	// Logging Level
+	// Cloud Messaging
+	public static let gcmMessageIDKey = "gcm.message_id"
 	
-	//Configurator
-	@MainActor public static func configurate(WithOptions: FirebaseOptions? = nil, globalOverrideLogLevel: Logger.Level? = nil) {
-		// FirebaseApp
+	/// Configures Firebase and Firappuccino
+	/// - Parameters:
+	///   - WithOptions: The FirebaseOptions, if any, to use in configuration
+	///   - globalOverrideLogLevel: An optional global override of the default `Logger.Level` for unified logging
+	  public static func configurate(WithOptions: FirebaseOptions? = nil, globalOverrideLogLevel: Logger.Level? = nil) {
+		
+		  // FirebaseApp
 		if let options = WithOptions {
 			FirebaseApp.configure(options: options)
 		}
@@ -30,6 +34,5 @@ public struct Configurator {
 		// Unified Logging
 		LoggingSystem.bootstrap(FOSLog.init)
 		FOSLog.overrideLogLevel = globalOverrideLogLevel
-		
 	}
 }

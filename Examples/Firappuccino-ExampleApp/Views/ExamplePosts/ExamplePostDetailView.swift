@@ -1,4 +1,6 @@
 import SwiftUI
+import Firappuccino
+import Firappuccino
 
 struct ExamplePostDetailView: View {
 	@EnvironmentObject var authService: ExampleAuthService
@@ -11,12 +13,22 @@ struct ExamplePostDetailView: View {
 				VStack(alignment: .center, spacing: 6){
 					Spacer()
 					postImage
+						.onAppear {
+							Task {
+								do {
+									print("The post title is \(try await postService.examplePost.`fetch`(\.title) ?? "No Title")")
+								}
+								catch let error as NSError {
+									Firappuccino.logger.error("\(error.localizedDescription)")
+								}
+							}
+						}
 					
 					Divider()
 						.padding()
 					
 					VStack(alignment: .leading, spacing: 6) {
-												
+						
 						Text("Likes")
 							.font(.title3.weight(.bold))
 							.lineLimit(3)
@@ -48,7 +60,6 @@ struct ExamplePostDetailView: View {
 							.padding([.bottom], 12)
 						Spacer()
 					}
-//					Spacer()
 				}
 				
 				VStack(alignment: .leading, spacing: 6) {

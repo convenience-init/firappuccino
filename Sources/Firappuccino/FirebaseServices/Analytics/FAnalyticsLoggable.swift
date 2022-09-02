@@ -4,7 +4,7 @@
  
  Some models, upon creation, can be logged to Analytics to monitor properties of user engagement. For instace, if we have a `DumbNFT` model:
  
- ```
+ ```swift
  struct DumbNFT: FModel, FAnalyticsLoggable {
  var name: String
  var price: Int
@@ -17,7 +17,7 @@
  }
  ```
  
- Calling ``log(key:)`` on an instance of `DumbNFT` will log an Analytics Event to firestore with the data as provided above.
+ Calling ```log(key:)``` on an instance of `DumbNFT` will log an Analytics Event to firestore with the data as provided above.
  */
 public protocol FAnalyticsLoggable {
 	

@@ -1,4 +1,3 @@
-import UIKit
 import Combine
 import Firebase
 import FirebaseAuth
@@ -39,7 +38,7 @@ public class FAuth: NSObject {
 	 - parameter email: The email to associate with the account.
 	 - parameter password: The password for the account.
 	 */
-	@MainActor public static func createAccount(email: String, password: String) async throws {
+	  public static func createAccount(email: String, password: String) async throws {
 		
 		do {
 			let authResult = try await auth.createUser(withEmail: email, password: password)
@@ -71,14 +70,14 @@ public class FAuth: NSObject {
 	/// - Parameter credential: The appropriate `AuthCredential` for the desired authorization flow.
 	/// - Note: Do not call this method directly if using "SignIn with Apple" or "Google SignIn" - call the appropriate convenience methods,
 	///
-	///````signInWithApple()````,
-	///````signInWithGoogle(clientID:)````, or
-	///````signInWithGoogle(clientID:secret:)````
+	///``signInWithApple()``,
+	///``signInWithGoogle(clientID:)``, or
+	///``signInWithGoogle(clientID:secret:)``
 	/// instead.
 	public static func signIn(with credential: AuthCredential) async throws {
 		do {
-			async let authResult = try await auth.signIn(with: credential)
-			try await handleAuthResult(authResult: try await authResult, error: nil)
+			let authResult = try await auth.signIn(with: credential)
+			try await handleAuthResult(authResult: authResult, error: nil)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -98,14 +97,11 @@ public class FAuth: NSObject {
 		}
 	}
 	
-	/// Allows you to specify actions to perform on the user object the user is updated.
+	/// Allows you to specify a closure with actions to perform when the Authentication State changes
 	/// - Parameters:
-	///   - type: The `Type` of your custom `FUser` object or subclass
-	///   - action: A closure containing the actions to perform when the the `FUser` object changes.
-	//
-	
-	
-	@MainActor public static func onAuthStateChanged<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FUser {
+	///   - type: The `Type` of your custom `FUser` object or sub-class
+	///   - action: A closure containing the actions to perform when the AuthState changes
+	  public static func onAuthStateChanged<T>(ofType type: T.Type, perform action: @escaping (T?) -> Void) where T: FUser {
 		if let authHandle = authHandle {
 			auth.removeStateDidChangeListener(authHandle)
 		}
@@ -115,7 +111,7 @@ public class FAuth: NSObject {
 			Firappuccino.Listener.`listen`(to: newUser.id, ofType: T.self, key: listenerKey) { document in
 				guard let document = document else {
 					action(newUser)
-					Task { try await newUser.`writeAndIndex`() }
+					Task { try await newUser.`write`() }
 					return
 				}
 				action(document)
@@ -129,7 +125,7 @@ public class FAuth: NSObject {
 	///   - forUserType: The user `Type` to query against.
 	/// - Returns: A `Bool`, `true` if the passed `username` is unique, `false` otherwise.
 	public static func isUsernameAvailable<T>(_ username: String, forUserType: T.Type) async throws -> Bool where T: FUser {
-		let path: WritableKeyPath<T, String> = \.username
+		let path: ReferenceWritableKeyPath<T, String> = \.username
 		return try await Firappuccino.Querier.wherePath(path, .equals, username).count<=0
 	}
 	
@@ -213,8 +209,8 @@ extension FAuth {
 		let redirectURI = "com.googleusercontent.apps.\(clientID):/oauthredirect"
 		accountProvider = .google
 		do {
-			async let credential = getCredential(clientID: _clientID, redirectUri: redirectURI)
-			try await handleGoogleSignInCredential(credential: try await credential)
+			let credential = try await getCredential(clientID: _clientID, redirectUri: redirectURI)
+			try await handleGoogleSignInCredential(credential: credential)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -267,27 +263,27 @@ extension FAuth {
 		let redirectURI = "com.googleusercontent.apps.\(clientID):/oauthredirect"
 		accountProvider = .google
 		do {
-			async let credential = getCredential(clientID: _clientID, redirectUri: redirectURI, secret: secret)
-			try await handleGoogleSignInCredential(credential: try await credential)
+			let credential = getCredential(clientID: _clientID, redirectUri: redirectURI, secret: secret)
+			try await handleGoogleSignInCredential(credential: credential)
 		}
 		catch let error as NSError {
-			Firappuccino.logger.error(error.localizedDescription)
+			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 		}
 	}
 	
 	/// Handles a redirectURI after completed sign-in from the user's browser.
 	/// - Parameter event: An `NSAppleEventDescriptor` to handle
-	/// In your `AppDelegate.swift`, implement `applicationDidFinishLaunching(_:)`:
+	/// In your `AppDelegate.swift`, implement ```applicationDidFinishLaunching(_:)```:
 	///
-	///	```
+	///	```swift
 	///	func applicationDidFinishLaunching(_ aNotification: Notification){
 	///	NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleEvent(event:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
 	///}
 	///```
 	///	*Using the SwiftUI lifecycle? See [this discussion](https://developer.apple.com/forums/thread/659537#answer-title) *.*
 	///In `AppDelegate.swift`, add an Objective-C exposed method ```handleEvent(event:replyEvent:)```:
-	///```
+	///```swift
 	///@objc private func handleEvent(event: NSAppleEventDescriptor, replyEvent:NSAppleEventDescriptor) {
 	///FAuth.handle(event: event)
 	///}
@@ -299,19 +295,26 @@ extension FAuth {
 		_ = GoogleAppAuth.shared.continueAuthorization(with: url, callback: nil)
 	}
 	
+	
+	/// Requests an AuthCredential from GoogleApp Auth
+	/// - Parameters:
+	///   - clientID: The Google `ClientID` for your project/app
+	///   - redirectUri: `String` representation of the redirect Uri
+	///   - secret: Google `ClientSecret`
+	/// - Returns: An optional `AuthCredential`
 	private static func getCredential(clientID: String, redirectUri: String, secret: String) async throws -> AuthCredential? {
 		var authCred: AuthCredential? = nil
 		do {
-			async let _ = try GoogleAppAuth.shared.authorize(clientID: clientID, clientSecret: secret, redirectUri: redirectUri, callback: nil)
+			let _ = try GoogleAppAuth.shared.authorize(clientID: clientID, clientSecret: secret, redirectUri: redirectUri, callback: nil)
 			
-			async let authorization = GoogleAppAuth.shared.getCurrentAuthorization()
-			if let accessToken = await authorization?.authState.lastTokenResponse?.accessToken, let idToken = await authorization?.authState.lastTokenResponse?.idToken {
+			let authorization = GoogleAppAuth.shared.getCurrentAuthorization()
+			if let accessToken = authorization?.authState.lastTokenResponse?.accessToken, let idToken = authorization?.authState.lastTokenResponse?.idToken {
 				let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
 				authCred = credential
 			}
 		}
 		catch let error as NSError {
-			FirappuccinoConfigurator.logger.error(error.localizedDescription)
+			Firappuccino.logger.error("\(error.localizedDescription)")
 			throw error
 		}
 		return authCred
@@ -363,7 +366,7 @@ extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPre
 	 
 	 - important: You do not need to call this method. You can override it to customize the view controller for which Sign In with Apple appears, if you'd like.
 	 */
-	@MainActor public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+	  public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
 #if os(iOS)
 		return ASPresentationAnchor()
 #elseif os(macOS)
@@ -377,7 +380,7 @@ extension FAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPre
 	 - important: It is not necessary to call this method, but you can override it to handle a success state on your own if you'd like.
 	 
 	 - parameter controller: The authorization controller that just completed
-	 - parameter authorization: The ``SignIn with Apple`` authorization
+	 - parameter authorization: The ```SignIn with Apple``` authorization
 	 */
 	public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
 		if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {

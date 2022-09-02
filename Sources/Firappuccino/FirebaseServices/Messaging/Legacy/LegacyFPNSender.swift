@@ -1,8 +1,9 @@
+#if !os(macOS)
 import UIKit
-
-public class LegacyFPNSender {
+#endif
+public class LegacyFPNSender: FPNSendable {
 	/*
-	 The `FUser` recipient must have a `deviceToken` property available in their user object. The `deviceToken` is automatically generated upon login, uploaded to Firestore, and managed by `LegacyFPNManager`.
+	 The `FUser` recipient must have a `deviceToken` property available in their user object. The `deviceToken` is automatically generated upon login, uploaded to Firestore, and managed by `FPNManager`.
 	 
 	 - parameter notification: The notification to send to the user.
 	 - parameter user: The user to send the notification to.
@@ -26,9 +27,15 @@ public class LegacyFPNSender {
 		}
 		let urlString = "https://fcm.googleapis.com/fcm/send"
 		let url = NSURL(string: urlString)!
+		
 		let paramString: [String: Any] = ["to": token,
-										  "notification": ["title": title, "body": body],
-										  "data": data
+										  "notification":
+											[
+												"title": title,
+												"body": body
+											],
+										  "data": data,
+										  "priority": "high"
 		]
 		let request = NSMutableURLRequest(url: url as URL)
 		request.httpMethod = "POST"

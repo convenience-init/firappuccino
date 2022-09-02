@@ -1,9 +1,9 @@
-import Foundation
 import Combine
+import Foundation
+import Firappuccino
+import FirebaseFunctions
 import FirebaseFirestore
 import FirebaseFirestoreSwift
-import FirebaseFunctions
-import Firappuccino
 
 final class ExamplePostRepository: ObservableObject {
 	
@@ -142,14 +142,7 @@ extension ExamplePostRepository {
 			
 			let recipient = try await fetchUser(id: postToLike.userId)
 			
-			switch Configurator.useLegacyMessaging {
-				case true:
-					// Legacy Messaging API
-					try await sendLegacyFPNMessage(to: recipient, messageBody: "Liked your Post \(postToLike.title)", additionalInfo: "Doesn't that make you feel AWESOME?!")
-				default:
-					// v1 Messaging API
-					try await sendUserMessage(to: recipient, messageBody: "Liked your Post \(postToLike.title)", attachmentImageURL: AppConstants.placeholderPostImageUrl, additionalInfo: "Doesn't that make you feel AWESOME?!")
-			}
+			try await sendFPNMessage(to: recipient, messageBody: "liked your Post: '\(postToLike.title)'!!", attachmentImageURL: nil, additionalInfo: "Sending and recieving Cloud Messages like this one using the v1 or Legacy Firebase Messaging API / APNs is a breeze with the Firappuccino framework...")
 		}
 		catch let error as NSError {
 			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
@@ -163,7 +156,6 @@ extension ExamplePostRepository {
 	private func linkUserId(to post: ExamplePost, fieldName: String) async throws {
 		do {
 			try await Firappuccino.Relator.`relate`(authService.currentUser, using: \.likedByUserIds, in: post)
-			//			try await Firappuccino.Relator.`relate`(authService.currentUser, toField: fieldName, in: post)
 		}
 		catch let error as NSError {
 			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
@@ -174,28 +166,28 @@ extension ExamplePostRepository {
 	
 	///Updates Values
 	private func updateValuesOnLikePostAction(_ post: ExamplePost) async throws {
-		var post = post
-		var originalPoster = try await fetchUser(id: post.userId)
+		//		var post = post
+		let originalPoster = try await fetchUser(id: post.userId)
 		
 		let likingUser = authService.currentUser
 		
 		// Updates for `ExamplePost`
-		try await post.increment(\.likes, by: 1)
+		try await post.incrementField(\.likes, by: 1)
 		
 		//		or...
-		//		try await Firappuccino.Counter.increment(\.likes, by: 1, in: post)
+		//		try await Firappuccino.Updater.incrementField(\ExamplePost.likes, by: 1, in: post)
 		
 		// Updates for `OP`
-		try await originalPoster.increment(\.totalLikesReceived, by: 1)
+		try await originalPoster.incrementField(\.totalLikesReceived, by: 1)
 		
 		//		or..
-		//		try await Firappuccino.Counter.increment(\.totalLikesReceived, by: 1, in: originalPoster)
+		//		try await Firappuccino.Updater.incrementField(\ExampleFUser.totalLikesReceived, by: 1, in: originalPoster)
 		
 		// writes updates
 		do {
-			try await likingUser.writeAndIndex()
+			try await likingUser.write()
 			try await post.write()
-			try await originalPoster.writeAndIndex()
+			try await originalPoster.write()
 		}
 		catch let error as NSError {
 			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
@@ -221,24 +213,14 @@ extension ExamplePostRepository {
 		return user
 	}
 	
-	// Legacy Mesaging API
-	private func sendLegacyFPNMessage(to recipient: ExampleFUser, messageBody: String, additionalInfo: String?) async throws {
-		do {
-			try await FPNMessaging.sendLegacyUserMessage(from: authService.currentUser, to: recipient, messageBody: messageBody, attachmentImageURL: URL(string: "https://source.unsplash.com/random/300x300/?guineapig"), additionalInfo: additionalInfo)
-			
-		}
-		catch let error as NSError {
-			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-			Firappuccino.logger.error("\(String(describing: self.error))")
-			throw error
-		}
-	}
 	
-	// Messaging API v1
-	private func sendUserMessage(to recipient: ExampleFUser, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws {
+	//attachmentImageURL:  URL(string: "https://firebasestorage.googleapis.com/v0/b/hilarist-authentication.appspot.com/o/FCMImages%2FHilaristPreviewProfileImage.png?alt=media&token=0d1a5276-4cea-4562-a0d2-c14c5cc6571b")!
+	
+	// Messaging
+	private func sendFPNMessage(to recipient: ExampleFUser, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws {
 		// TODO: `Categories` param
 		do {
-			try await FPNMessaging.sendUserMessage(from: authService.currentUser, to: recipient, messageBody: messageBody, attachmentImageURL: attachmentImageURL, additionalInfo: additionalInfo)
+			try await FPNManager.sendUserMessage(from: authService.currentUser, to: recipient, messageBody: messageBody, attachmentImageURL: attachmentImageURL, additionalInfo: additionalInfo)
 			
 		}
 		catch let error as NSError {

@@ -28,7 +28,7 @@ public struct FirappuccinoResourceStore {
 	///   - progress: A closure for handling progress updates.
 	/// - Returns: A valid `URL` to the resource or `nil`
 	/// - Throws: An `Error`
-	@MainActor public static func put(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void = { _ in }) async -> URL? {
+	  public static func put(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void = { _ in }) async -> URL? {
 		await delete(resource)
 		return await unsafePut(data, to: resource, progress: progress)
 	}
@@ -39,7 +39,7 @@ public struct FirappuccinoResourceStore {
 	 - parameter resource: Information about the location of the resource in Firebase Storage.
 	 */
 	@discardableResult
-	@MainActor public static func delete(_ resource: FirappuccinoStorageResource) async -> Bool {
+	  public static func delete(_ resource: FirappuccinoStorageResource) async -> Bool {
 		let ref = storageRef.child(resource.path)
 		return await withCheckedContinuation { continuation in
 			ref.delete(completion: { err in
@@ -57,26 +57,26 @@ public struct FirappuccinoResourceStore {
 	/**
 	 Pauses an upload task.
 	 */
-	@MainActor public static func pause() {
+	  public static func pause() {
 		task?.pause()
 	}
 	
 	/**
 	 Resumes an upload task.
 	 */
-	@MainActor public static func resume() {
+	  public static func resume() {
 		task?.resume()
 	}
 	
 	/**
 	 Cancels an upload task.
 	 */
-	@MainActor public static func cancel() {
+	  public static func cancel() {
 		task?.cancel()
 	}
 	
 	@available(*, renamed: "unsafePut(_:to:progress:)")
-	@MainActor private static func unsafePut(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void, completion: @escaping (URL?) -> Void = { _ in }) {
+	  private static func unsafePut(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void, completion: @escaping (URL?) -> Void = { _ in }) {
 		Task {
 			let result = await unsafePut(data, to: resource, progress: progress)
 			completion(result)
@@ -84,7 +84,7 @@ public struct FirappuccinoResourceStore {
 	}
 	
 	@discardableResult
-	@MainActor private static func unsafePut(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void) async -> URL? {
+	  private static func unsafePut(_ data: Data, to resource: FirappuccinoStorageResource, progress: @escaping (Double) -> Void) async -> URL? {
 		let ref = storageRef.child(resource.path)
 		let metadata = StorageMetadata()
 		metadata.contentType = resource.kind.contentType()

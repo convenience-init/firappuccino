@@ -1,6 +1,5 @@
 import Foundation
 
-
 extension Bundle {
 	
 	internal static var versionString: String {

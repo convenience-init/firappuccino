@@ -25,8 +25,8 @@ public struct Firappuccino {
 	internal static func fetchArray<T>(from id: DocumentID, ofType type: T.Type, path: KeyPath<T, [DocumentID]>) async throws -> [DocumentID]? where T: FDocument {
 		
 		do {
-			async let result = try await db.collection(colName(of: T.self)).document(id).getDocument()
-			let document = try await result.data(as: T.self)
+			let result = try await db.collection(colName(of: T.self)).document(id).getDocument()
+			let document = try result.data(as: T.self)
 			let array = document[keyPath: path]
 			return array
 		}
@@ -41,14 +41,10 @@ public struct Firappuccino {
 	/// - Parameter type: the `Type` of the object to be stored.
 	/// - Returns: A `String` reresentation of the passed object's `Type`.
 	public static func colName<T>(of type: T.Type) -> CollectionName {
-		var str = String(describing: T.self)
-		if let dotRange = str.range(of: ".") {
-			str.removeSubrange(str.startIndex ..< dotRange.lowerBound)
+		var string = String(describing: T.self)
+		if let dotRange = string.range(of: ".") {
+			string.removeSubrange(string.startIndex ..< dotRange.lowerBound)
 		}
-		return str
+		return string
 	}
-}
-
-extension Firappuccino {
-	
 }

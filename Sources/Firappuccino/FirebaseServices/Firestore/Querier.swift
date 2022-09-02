@@ -8,14 +8,14 @@ extension Firappuccino {
 	 */
 	public struct Querier {
 		
-		public typealias QueryConditionBlock<T, U> = (WritableKeyPath<T, U>, QueryCondition<T, U>.Comparison, U)
+		public typealias QueryConditionBlock<T, U> = (ReferenceWritableKeyPath<T, U>, QueryCondition<T, U>.Comparison, U)
 		
 		/**
 		 FQuery a collection of documents, matching the given condition.
 		 
 		 Use the `path` argument to specify the collection to query. For instance, if you have a collection of `FUser` objects, and you want to search for users matching the `displayName` of `"Atreyu"`, you can query like so:
 		 
-		 ```
+		 ```swift
 		 Firappuccino.Querier.`queryWhere`(\MyUser.displayName, .equals, "Atreyu") { users in
 		 // ...
 		 }
@@ -27,7 +27,7 @@ extension Firappuccino {
 		 - parameter order: The way the documents are ordered. This will always order by the field provided in the `path` parameter.
 		 - parameter limit: The maximum amount of documents to query.
 		 */
-		public static func wherePath<T, U>(_ path: WritableKeyPath<T, U>, _ comparison: QueryCondition<T, U>.Comparison, _ value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
+		public static func wherePath<T, U>(_ path: ReferenceWritableKeyPath<T, U>, _ comparison: QueryCondition<T, U>.Comparison, _ value: U, order: OrderBy? = nil, limit: Int? = nil) async throws -> [T] where T: FDocument {
 			await whereCondition(QueryCondition(path: path, comparison: comparison, value: value), order: order, limit: limit)
 		}
 		
@@ -37,7 +37,7 @@ extension Firappuccino {
 		 Each condition you wish to check is organized in `QueryConditionBlock`s. A `QueryConditionBlock` is equivalent to the tuple `(path, comparison, value)` of types `(KeyPath<_,_>, Comparison, Any)`. You can use this method to query with multiple conditions chained by the logical `AND` operator.
 		 
 		 
-		 ```
+		 ```swift
 		 let users = try await Firappuccino.Querier.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.createdAt, .lessThan, Date())
@@ -46,13 +46,13 @@ extension Firappuccino {
 		 
 		 - note: If you are passing `order: .ascending` or `order: .descending` as an argument, ensure that your *first* `QueryConditionBlock` constrains the field you want to have ordered.
 		 
-		 ````
+		 ```swift
 		 let users = try await Firappuccino.Querier.`queryWhere`(
 		 (\MyFirappuccinoUser.displayName, .equals, "Atreyu"),
 		 (\MyFirappuccinoUser.createdAt, .lessThan, Date()),
 		 order: .ascending, limit: 8
 		 )
-		 ````
+		 ```
 		 - parameter path: The path to the field to check.
 		 - parameter comparison: The comparison to use.
 		 - parameter value: The value to compare with.
@@ -81,9 +81,9 @@ extension Firappuccino {
 			}
 			if let order = order {
 				if order == .ascending {
-					query = query.order(by: conditions.first!.path.string)
+					query = query.order(by: conditions.first!.path.fieldName)
 				} else if order == .descending {
-					query = query.order(by: conditions.first!.path.string, descending: true)
+					query = query.order(by: conditions.first!.path.fieldName, descending: true)
 				}
 			}
 			if let limit = limit {
@@ -112,7 +112,7 @@ extension Firappuccino {
 		public struct QueryCondition<T, U> {
 			
 			/// The path of the field to query.
-			public var path: WritableKeyPath<T, U>
+			public var path: ReferenceWritableKeyPath<T, U>
 			/// The comparison used to filter a query.
 			public var comparison: Comparison
 			/// The value to check.
@@ -121,55 +121,55 @@ extension Firappuccino {
 			
 			internal func apply(to reference: CollectionReference) -> Query {
 				switch comparison {
-					case .equals: return reference.whereField(path.string, isEqualTo: value)
-					case .lessThan: return reference.whereField(path.string, isLessThan: value)
-					case .lessEqualTo: return reference.whereField(path.string, isLessThanOrEqualTo: value)
-					case .greaterThan: return reference.whereField(path.string, isGreaterThan: value)
-					case .greaterEqualTo: return reference.whereField(path.string, isGreaterThanOrEqualTo: value)
-					case .notEquals: return reference.whereField(path.string, isNotEqualTo: value)
-					case .contains: return reference.whereField(path.string, arrayContains: value)
+					case .equals: return reference.whereField(path.fieldName, isEqualTo: value)
+					case .lessThan: return reference.whereField(path.fieldName, isLessThan: value)
+					case .lessEqualTo: return reference.whereField(path.fieldName, isLessThanOrEqualTo: value)
+					case .greaterThan: return reference.whereField(path.fieldName, isGreaterThan: value)
+					case .greaterEqualTo: return reference.whereField(path.fieldName, isGreaterThanOrEqualTo: value)
+					case .notEquals: return reference.whereField(path.fieldName, isNotEqualTo: value)
+					case .contains: return reference.whereField(path.fieldName, arrayContains: value)
 					case .in:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the IN query comparison.")
 						}
-						return reference.whereField(path.string, in: array)
+						return reference.whereField(path.fieldName, in: array)
 					case .notIn:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the NOT_IN query comparison.")
 						}
-						return reference.whereField(path.string, notIn: array)
+						return reference.whereField(path.fieldName, notIn: array)
 					case .containsAnyOf:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the CONTAINS_ANY_OF query comparison.")
 						}
-						return reference.whereField(path.string, arrayContainsAny: array)
+						return reference.whereField(path.fieldName, arrayContainsAny: array)
 				}
 			}
 			
 			internal func apply(to query: Query) -> Query {
 				switch comparison {
-					case .equals: return query.whereField(path.string, isEqualTo: value)
-					case .lessThan: return query.whereField(path.string, isLessThan: value)
-					case .lessEqualTo: return query.whereField(path.string, isLessThanOrEqualTo: value)
-					case .greaterThan: return query.whereField(path.string, isGreaterThan: value)
-					case .greaterEqualTo: return query.whereField(path.string, isGreaterThanOrEqualTo: value)
-					case .notEquals: return query.whereField(path.string, isNotEqualTo: value)
-					case .contains: return query.whereField(path.string, arrayContains: value)
+					case .equals: return query.whereField(path.fieldName, isEqualTo: value)
+					case .lessThan: return query.whereField(path.fieldName, isLessThan: value)
+					case .lessEqualTo: return query.whereField(path.fieldName, isLessThanOrEqualTo: value)
+					case .greaterThan: return query.whereField(path.fieldName, isGreaterThan: value)
+					case .greaterEqualTo: return query.whereField(path.fieldName, isGreaterThanOrEqualTo: value)
+					case .notEquals: return query.whereField(path.fieldName, isNotEqualTo: value)
+					case .contains: return query.whereField(path.fieldName, arrayContains: value)
 					case .in:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the IN query comparison.")
 						}
-						return query.whereField(path.string, in: array)
+						return query.whereField(path.fieldName, in: array)
 					case .notIn:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the NOT_IN query comparison.")
 						}
-						return query.whereField(path.string, notIn: array)
+						return query.whereField(path.fieldName, notIn: array)
 					case .containsAnyOf:
 						guard let array = value as? [Any] else {
 							fatalError("You must pass an array as a value when using the CONTAINS_ANY_OF query comparison.")
 						}
-						return query.whereField(path.string, arrayContainsAny: array)
+						return query.whereField(path.fieldName, arrayContainsAny: array)
 				}
 			}
 			

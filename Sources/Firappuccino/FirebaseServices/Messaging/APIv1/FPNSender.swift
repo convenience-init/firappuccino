@@ -3,12 +3,12 @@ import FirebaseMessaging
 import SwiftJWT
 
 
-public struct FPNMessaging {
+public struct FPNSender: FPNSendable {
 	
-	/// The Relative `URL` `String` path of the Google Service Account`` private `._key` file
+	/// The Relative path to the private `._key` file for Google Service Account
 	public static var privateKeyFilePath: String = ""
 	
-	/// The Relative `URL` `String` path of the Google Service Account public `.key` file
+	/// The Relative path of the Google Service Account public `.key` file
 	public static var publicKeyFilePath: String = ""
 	
 	/// The `String` value of issuer property of a `MessageClaim`
@@ -17,7 +17,7 @@ public struct FPNMessaging {
 	/// The Name of the Firebase Project Associated with your App
 	public static var projectName: String = ""
 	
-	/// The OAuth 2.0 Bearer Token generated from public/privavte keypair
+	/// The OAuth 2.0 Bearer Token generated from public/private keypair
 	private static var bearerToken: String = ""
 	
 	/// The URL location of the Google Service Account private `._key` file
@@ -51,12 +51,12 @@ public struct FPNMessaging {
 	}
 	
 	/// Returns the user's device token for the current device.
-	public static var deviceToken: String? {
-		return Messaging.messaging().fcmToken
+	public static var deviceToken: String {
+		Messaging.messaging().fcmToken ?? "-"
 	}
 	
 	/// Subscribes the user to the specified topic.
-	/// - Parameter topics: The `[String]` names of the topics to subscribe to.
+	/// - Parameter topics: An Array containing the  names of the topics to subscribe to.
 	/// - Throws: An `NSError`
 	public static func subscribe(to topics: [String]) async throws {
 		for topic in topics {
@@ -71,7 +71,7 @@ public struct FPNMessaging {
 	}
 	
 	/// Unsubscribes the user from the specified topics.
-	/// - Parameter topics: The `[String]` names of the topics to unsubscribe from.
+	/// - Parameter topics: An array contsining the names of the topics to unsubscribe from.
 	/// Throws: An `NSError`
 	public static func unsubscribe(from topics: [String]) async throws {
 		for topic in topics {
@@ -85,57 +85,21 @@ public struct FPNMessaging {
 		}
 	}
 	
-	public static func sendLegacyUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
-		
-		do {
-			//TODO: - `CaseIteratable` category enum
-			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
-			// Legacy API
-			try await Firappuccino.sender.send(message, to: recipient, data: ["count": recipient.notifications.filter({ !$0.read }).count])
-			// v1 API
-			//			try await FPNMessaging.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
-		}
-		catch let error as NSError {
-			Firappuccino.logger.error("\(error.localizedDescription)")
-			throw error
-		}
-	}
-	/// Triggers the send of a FPNMessage Payload to the specified `FUser`
-	/// - Parameters:
-	///   - sender: The `FUser` whose in-app action triggered the send.
-	///   - recipient: The intended recipient of the `FPNMessage`
-	///   - messageBody: The body of the `FPNMessage`
-	///   - attachmentImageURL: The `URL` for an optional image attachment
-	///   - additionalInfo: Additional descriptive info to include in the `FPNMessage`
-	///   - throws: An `NSError`
-	public static func sendUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
-		
-		do {
-			//FIXME: - Use a category enum and an `allCases` computed property
-			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
-			try await FPNMessaging.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
-		}
-		catch let error as NSError {
-			Firappuccino.logger.error("\(error.localizedDescription)")
-			throw error
-		}
-	}
 	
-	/// Handles the preparation, authentication and sending of the `FPNMessage` to the specified `FUser` via Firebase REST API.
+	/// Handles the preparation, authentication and sending of the `FPNMessage` to the specified `FUser` via Firebase Messaging API v1.
 	/// - Parameters:
 	///   - message: The `FPNMessage` to send to the recipient `FUser`.
-	///   - user: The `FUser` to receive the push `FPNMessage`.
+	///   - user: The `FUser` to receive the push notification.
 	/// - Throws: An `NSError`
-	/// - Note: This will not add a `FPNMessage` object to the user's `FirebaseMessaging` notification list.
-	private static func sendUserActionMessagingNotification<T>(message: FPNMessage, to recipient: T, withData messageData: [AnyHashable: Any]) async throws where T: FUser {
+	internal static func sendUserActionMessagingNotification<T>(message: FPNMessage, to recipient: T, withData messageData: [AnyHashable: Any]) async throws where T: FUser {
 		
-		async let jwt = try await createMessagingJWT()
+		let jwt = try await createMessagingJWT()
 		
 		let headers = ["Content-Type": "application/x-www-form-urlencoded"]
 		
 		let postData = NSMutableData(data: "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer".data(using: String.Encoding.utf8)!)
 		
-		postData.append("&assertion=\(try await jwt)".data(using: String.Encoding.utf8)!)
+		postData.append("&assertion=\(jwt)".data(using: String.Encoding.utf8)!)
 		
 		let request = NSMutableURLRequest(url: NSURL(string: "https://oauth2.googleapis.com/token")! as URL,
 										  cachePolicy: .useProtocolCachePolicy,
@@ -165,7 +129,7 @@ public struct FPNMessaging {
 			
 			Task {
 				do {
-					try await sendNotificationTo(recipient, title: message.title, body: message.pushBody, imageURL: message.image, bearerToken: bearerToken, data: messageData)
+					try await sendNotificationTo(recipient, title: message.title, body: message.pushBody, imageURL: message.imageURL, bearerToken: bearerToken, data: messageData)
 				}
 				catch let error as NSError {
 					Firappuccino.logger.error("\(error.localizedDescription)")
@@ -179,7 +143,7 @@ public struct FPNMessaging {
 	/// Creates a signed `JWT` from the private `._key` file to request a `Bearer` scoped to `firebase.messaging` that is then passed to ```sendNotificationTo(_:title:body:imageURL:bearerToken:data:)```.
 	/// - Returns: A `JWT` as a base64 encoded `String` or a thrown `Error`
 	/// - Throws: An `NSError`
-	/// - Warning: Must set FPNMessaging.iss static property in AppDelegate before using `FPNMessaging`
+	/// - Warning: Must set FPNSender.iss static property in AppDelegate before using `FPNSender`
 	private static func createMessagingJWT() async throws -> String {
 		
 		guard !iss.isEmpty else {
@@ -187,7 +151,7 @@ public struct FPNMessaging {
 			return ""
 		}
 		
-		let claims = FPNMessagingJWTClaim(iss: iss, scope: "https://www.googleapis.com/auth/firebase.messaging", aud: "https://oauth2.googleapis.com/token", exp: Date(timeIntervalSinceNow: 3600), iat: Date())
+		let claims = MessagingJWTClaim(iss: iss, scope: "https://www.googleapis.com/auth/firebase.messaging", aud: "https://oauth2.googleapis.com/token", exp: Date(timeIntervalSinceNow: 3600), iat: Date())
 		
 		var messageJWT = JWT(claims: claims)
 		let jwtSigner = JWTSigner.rs256(privateKey: privateKey)
@@ -199,13 +163,13 @@ public struct FPNMessaging {
 	/// - Returns: A `String` Bearer token that will be passed into ```sendNotificationTo(_:title:body:imageURL:bearerToken:data:)```.
 	/// - Throws: An `NSError`
 	private static func getBearerToken() async throws -> String {
-		async let jwt = try await createMessagingJWT()
+		let jwt = try await createMessagingJWT()
 		var bearer = ""
 		let headers = ["Content-Type": "application/x-www-form-urlencoded"]
 		
 		let postData = NSMutableData(data: "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer".data(using: String.Encoding.utf8)!)
 		
-		postData.append("&assertion=\(try await jwt)".data(using: String.Encoding.utf8)!)
+		postData.append("&assertion=\(jwt)".data(using: String.Encoding.utf8)!)
 		
 		let request = NSMutableURLRequest(url: NSURL(string: "https://oauth2.googleapis.com/token")! as URL,
 										  cachePolicy: .useProtocolCachePolicy,
@@ -233,7 +197,7 @@ public struct FPNMessaging {
 	}
 	
 	
-	/// Sends a `POST` request to `FirebaseMessaging` REST API to trigger the notification send
+	/// Triggers the notification send
 	/// - Parameters:
 	///   - recipient: The `FUser` who is the recipient of the notification
 	///   - title: The title of the notification
@@ -266,11 +230,13 @@ public struct FPNMessaging {
 		if let imageURL = imageURL, !imageURL.isEmpty {
 			parameters = ["message": [
 				"token": "\(deviceToken)",
-				"notification": [
-					"title": "\(title)",
-					"body": "\(body)",
-					"image": "\(imageURL)"
-				]
+				"notification":
+					[
+						"title": "\(title)",
+						"body": "\(body)",
+						"image": "\(imageURL)",
+						"priority": "high"
+					]
 			]] as [String : Any]
 		}
 		

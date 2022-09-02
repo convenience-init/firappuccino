@@ -2,7 +2,7 @@ import SwiftUI
 /*
  usage:
  
- ```
+ ```swift
  struct ExampleScreen: View {
  var body: some View {
  NavigationView {

@@ -5,16 +5,10 @@ import FirebaseMessaging
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-public final class KeyPathable: FieldNameReferenceable {
-	public static var fieldNames: [PartialKeyPath<KeyPathable> : String] {
-		[:]
-	}
-}
 
-open class FUserBase: NSObject, FUser {
-	
-	public var index: Int?
-	
+/// An extensible base class conforming to `FUser` Protocol
+open class UserBase: NSObject, FUser {	
+		
 	@objc public var id: String
 	
 	@objc public var createdAt: Date
@@ -37,11 +31,10 @@ open class FUserBase: NSObject, FUser {
 	
 	@objc public var username: String
 	
-	public var displayName: String
+	@objc public var displayName: String
 	
 	required public override init() {
 		id = "dummy"
-		index = -1
 		createdAt = Date()
 		deviceToken = ""
 		appVersion = Bundle.versionString
@@ -53,4 +46,4 @@ open class FUserBase: NSObject, FUser {
 	}
 }
 
-extension FUserBase: Identifiable {}
+extension UserBase: Identifiable {}

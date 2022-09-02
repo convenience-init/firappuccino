@@ -1,5 +1,5 @@
 
-/// The ID of a document.
+/// The `id` of a document.
 public typealias DocumentID = String
 
 /**
@@ -7,10 +7,10 @@ public typealias DocumentID = String
  
  Adopt the `FDocument` protocol to send your own custom document models.
  
- All documents must have `id`, `createdAt` properties, as well as a way to check for equality:
+ All documents must declare `id`, `createdAt` properties, as well as a way to check for equality:
  
  ```swift
- class Post: FirappuccinoDocument {
+ class Post: FDocument {
  
  var id: String
  var createdAt: Date = Date()
@@ -32,7 +32,7 @@ public typealias DocumentID = String
  
  Once you've instantiated documents, you can easily perform various database operations inline using `KeyPath`s.
  
- ````
+ ```swift
  // Create `stupidApeOne` and `stupidApeToo` `DumbNFT` objects:
  var stupidApeOne = DumbNFT(id: "0", name: "stupidApeOne", price: 250_000)
  var stupidApeToo = DumbNFT(id: "1", name: "stupidApeToo", price: 150_000)
@@ -42,22 +42,21 @@ public typealias DocumentID = String
  
  // Fetcher the most up-to-date price info for `stupidApeOne`
  do {
- 	let currentPrice = try await stupidApeOne.`fetch`(\.price)
- 	print("StupidApeOne will currently set you back \(currentPrice)")
+ let currentPrice = try await stupidApeOne.`fetch`(\.price)
+ Firappuccino.logger.info("The current price of \(stupidApeOne.id) is \(currentPrice)")
  }
- catch {
- 	//...
+ catch let error as NSError {
+ //...
+ throw error
  }
-
+ 
  ```
  */
-public protocol FDocument: FModel, Identifiable, Equatable {
+public protocol FDocument: NSObject, FModel, Identifiable {
 	
-	/// The document's unique identifier.
+	/// The document's identifier.
 	///
-	/// -important: FDocuments with identical IDs will be merged when sent to Firestore.
-	///
-	/// To avoid this, it's advisable to assign `UUID().uuidStringSansDashes` as the default value when creating new documents.
+	/// To avoid duplicated `id`s and possible data loss, assign `UUID().uuidStringSansDashes` as the default value when creating new documents.
 	///
 	var id: String { get set }
 	
@@ -68,19 +67,12 @@ public protocol FDocument: FModel, Identifiable, Equatable {
 
 extension FDocument {
 	
-	public static func ==(lhs: Self, rhs: Self) -> Bool {
-		return lhs.id == rhs.id
-	}
-}
-
-extension FDocument {
-	
 	/**
 	 Writes the document to Firestore.
 	 
 	 Documents are automatically stored in collections named the same as their type.
 	 
-	 If the document to be written has the same ID as an existing document in a collection, the old document will be overwritten.
+	 If the document to be written has the same `id` as an existing document in a collection, the old document will be overwritten.
 	 */
 	public func `write`() async throws {
 		do {
@@ -98,12 +90,11 @@ extension FDocument {
 	 - parameter value: The new value.
 	 - parameter path: The keyPath to the field.
 	 */
-	public mutating func `write`<T>(value: T, using path: WritableKeyPath<Self, T>) async throws where T: Codable {
-//		var _self = self
-//		_self[keyPath: path] = value
+	public func `updateRemoteField`<T>(with value: T, using path: ReferenceWritableKeyPath<Self, T>) async throws where T: Codable {
+		
 		self[keyPath: path] = value
 		do {
-			try await Firappuccino.Writer.`write`(value: value, using: path, in: self)
+			try await Firappuccino.Writer.updateRemoteField(path, in: self)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -116,15 +107,10 @@ extension FDocument {
 	 - parameter path: The path to the field to update.
 	 - parameter increment: The amount to increment by.
 	 */
-	public mutating func increment<T>(_ path: WritableKeyPath<Self, T>, by increment: T) async throws where T: AdditiveArithmetic {
+	public func incrementField<T>(_ path: ReferenceWritableKeyPath<Self, T>, by incrementAmount: T) async throws where T: AdditiveArithmetic {
 		do {
-			var fieldValue = self[keyPath: path]
-			if let incrementAmount = increment as? Int {
-				try await Firappuccino.Counter.increment(path.string, by: incrementAmount, in: self)
-				fieldValue.add(increment)
-				self[keyPath: path] = fieldValue
-//				var _self = self
-//				_self[keyPath: path] = fieldValue
+			if let incrementAmount = incrementAmount as? Int {
+				try await Firappuccino.Updater.incrementField(path, by: incrementAmount, in: self)
 			}
 		}
 		catch let error as NSError {
@@ -135,18 +121,17 @@ extension FDocument {
 	}
 	
 	/**
-	 Asynchronously fetch the most up-to-date document field value from a specified keyPath.
+	 Asynchronously fetch the most up-to-date document field value given a valid path to the field.
 	 
 	 - parameter path: The keyPath to the field.
 	 */
-	public func `fetch`<T>(_ path: KeyPath<Self, T>) async throws -> T? where T: Codable {
+	public func `fetch`<T>(_ path: ReferenceWritableKeyPath<Self, T>) async throws -> T? where T: Codable {
 		guard let document = try await Firappuccino.Fetcher.`fetch`(id: self.id, ofType: Self.self) else { return nil }
 		return document[keyPath: path]
 		
 	}
 	
-	
-	/// Assigns the specified "child" `FDocument`'s ID to a collection of DocumentIDs in a "parent" `FDocument` document in Firestore.
+	/// Assigns the specified "child" `FDocument`'s `id` to a collection of DocumentIDs in a "parent" `FDocument` document in Firestore.
 	/// - Parameters:
 	///   - path: The path to the `field` of `DocumentID`s in the parent `FDocument`.
 	///   - parent: The parent `FDocument` containing the field of `DocumentID`s
@@ -156,7 +141,7 @@ extension FDocument {
 	///   will add the `post`'s ID to `users`'s `draftPosts`.
 	///  - important: Fields will not be updated locally using this method.
 	
-	public func `relate`<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	public func `relate`<T>(to path: ReferenceWritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		
 		do {
 			try await Firappuccino.Relator.`relate`(self, using: path, in: parent)
@@ -167,16 +152,13 @@ extension FDocument {
 		}
 	}
 	
-	
-	///  Sets the document in Firestore, then assigns it to a field list of `DocumentID`s to a parent document.
+	/// Writes the document to Firestore, then relates it to a field list of `DocumentID`s to a parent document.
 	/// - Parameters:
-	///   - field: field description
-	///   - path: path description
-	///   - parent: parent description
-
-	public func writeAndRelate<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	///   - path: the keyPath to the field
+	///   - parent: the parent document containing the field
+	public func writeAndRelate<T>(using path: ReferenceWritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
-			try await Firappuccino.Writer.writeAndLink(self, using: path, in: parent)
+			try await Firappuccino.Writer.writeAndRelate(self, using: path, in: parent)
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
@@ -188,8 +170,7 @@ extension FDocument {
 	/// - Parameters:
 	///   - path: path description
 	///   - parent: parent description
-
-	public func unlink<T>(using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+	public func `unrelate`<T>(using path: ReferenceWritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 		do {
 			try await Firappuccino.Relator.`unrelate`(self, using: path, in: parent)
 		}
@@ -200,3 +181,9 @@ extension FDocument {
 	}
 }
 
+extension FDocument {
+	
+	public static func ==(lhs: Self, rhs: Self) -> Bool {
+		return lhs.id == rhs.id
+	}
+}

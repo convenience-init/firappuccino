@@ -1,7 +1,7 @@
 import Foundation
 import Firappuccino
 
-class ExampleFUser: FUserBase {
+class ExampleFUser: UserBase {
 	
 	@objc var firstName: String = ""
 	@objc var lastName: String = ""

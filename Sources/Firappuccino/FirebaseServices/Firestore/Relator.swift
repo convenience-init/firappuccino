@@ -11,7 +11,7 @@ extension Firappuccino {
 		///   - child: The child document (only used to `fetch` an ID).
 		///   - path: The path of the parent document's field containing the list of `DocumentID`s.
 		///   - parent: The parent document containing the list of `DocumentID`s.
-		public static func `relate`<T, U>(_ child: T, using path: WritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+		public static func `relate`<T, U>(_ child: T, using path: ReferenceWritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			do {
 				try await append(child.id, using: path, in: parent)
 			}
@@ -20,15 +20,16 @@ extension Firappuccino {
 				throw error
 			}
 		}
-		
+
 		/**
-		 Un-assigns a document's ID from a list of `DocumentID`s in the parent document.
+		 Removes a document's `id` from a list of `DocumentID`s in the parent document.
 		 
-		 - parameter child: The child document (only used to `fetch` an ID).
+		 - parameter child: The child document (only used to `fetch` an `id`).
 		 - parameter path: The path of the parent document's field containing the list of `DocumentID`s.
 		 - parameter parent: The parent document containing the list of `DocumentID`s.
 		 */
-		public static func `unrelate`<T, U>(_ child: T, using path: WritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+
+		public static func `unrelate`<T, U>(_ child: T, using path: ReferenceWritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 
 			do {
 				try await unappend(child.id, using: path, in: parent)
@@ -39,12 +40,16 @@ extension Firappuccino {
 			}
 		}
 		
-		private static func append<T>(_ id: DocumentID, using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+		private static func append<T>(_ id: DocumentID, using path: ReferenceWritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 
 			do {
 				guard var array = try await fetchArray(from: parent.id, ofType: T.self, path: path) else { throw RelationError.noParentArray }
 				array <= id
-				try await Writer.`write`(value: array, using: path, in: parent)
+				
+//				var parent = parent
+				parent[keyPath: path] = array
+				
+				try await Writer.updateField(path, in: parent, with: array)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(RelationError.noParentArray)")
@@ -53,12 +58,14 @@ extension Firappuccino {
 			}
 		}
 		
-		private static func unappend<T>(_ id: DocumentID, using path: WritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
+		private static func unappend<T>(_ id: DocumentID, using path: ReferenceWritableKeyPath<T, [DocumentID]>, in parent: T) async throws where T: FDocument {
 			do {
-				async let array = try await fetchArray(from: id, ofType: T.self, path: path)
-				guard var array = try await array else { throw RelationError.noParentArray }
+				let array = try await fetchArray(from: parent.id, ofType: T.self, path: path)
+				guard var array = array else { throw RelationError.noParentArray }
 				array -= id
-				try await Writer.`write`(value: array, using: path, in: parent)
+//				var parent = parent
+				parent[keyPath: path] = array
+				try await Writer.updateField(path, in: parent, with: array)
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")

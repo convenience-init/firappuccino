@@ -77,9 +77,9 @@ public class FirappuccinoStorageResource: NSObject, FModel {
 		
 		let document = document
 		do {
-			async let resourceURL = await FirappuccinoResourceStore.put(data, to: FirappuccinoStorageResource(id: document.id, folder: andPath), progress: progress)
+			let resourceURL = await FirappuccinoResourceStore.put(data, to: FirappuccinoStorageResource(id: document.id, folder: andPath), progress: progress)
 			try await document.`write`()
-			return await resourceURL
+			return resourceURL
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")

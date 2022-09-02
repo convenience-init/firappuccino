@@ -2,17 +2,17 @@
 /** A `typealias` representing the `String` name of the message category.
  
  You can implement an enum of custom categories in your app if you like:
- ````
+ ```swift
  enum MessageCategory: FPNMessageCategory {
  case _none
  case _all
  }
- ````
+ ```
  */
 public typealias FPNMessageCategory = String
 
 
-/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app. This Service uses the V1 API, as the Legacy API's deprecation is looming. Until then, feel free to use the `LegacyFPNManager` and `LegacyFPNSender`
+/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app. This Service uses the V1 API, as the Legacy API's deprecation is looming. Until then, feel free to use the `FPNManager` and `LegacyFPNSender`
 ///
 /// "*FUser X* liked your content *XXX*!"
 ///
@@ -21,9 +21,9 @@ public typealias FPNMessageCategory = String
 /// "*FUser X* responded to your question *XXX*!"
 ///
 /// - Remark: If you want to send a message with just a title and a body to a user, call
-///	````
-///	FPNMessaging.sendNotificationTo<T>(to:title:body:data:)
-///	````
+///	```swift
+///	FPNSender.sendNotificationTo<T>(to:title:body:data:)
+///	```
 public class FPNMessage: NSObject, FModel {
 	
 	/// The date of the notification.
@@ -33,7 +33,7 @@ public class FPNMessage: NSObject, FModel {
 	 This value can be used to limit user notifications by appending it to the array
 	 
 	 Example:
-	 ```
+	 ```swift
 	 MyFirappuccinoUser.disabledNotificationCategories.append(category)
 	 ```
 	 */
@@ -57,7 +57,7 @@ public class FPNMessage: NSObject, FModel {
 	public var pushBody: String
 	
 	/// The attached image URL `String` for the notification. If not passed a value, Firebase Messaging default will be used.
-	public var image: String?
+	public var imageURL: String?
 	
 	/// Whether the notification has been read
 	public var read: Bool = false
@@ -70,7 +70,7 @@ public class FPNMessage: NSObject, FModel {
 		self.pushBody = "\(sendingUser.displayName) \(self.messageBody)"
 		
 		if let imageURL = imageFromURL {
-			self.image = imageURL
+			self.imageURL = imageURL
 		}
 		
 		if let additionalInfo = additionalInfo {

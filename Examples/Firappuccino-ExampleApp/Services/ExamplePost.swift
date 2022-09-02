@@ -1,12 +1,13 @@
 import Foundation
 import Firappuccino
 
+
 class ExamplePost: NSObject, FDocument {
 	// Required by `FDocument` protocol
 	var id: String = UUID().uuidStringSansDashes
 	var createdAt: Date = Date()
 	
-	// Custom properties
+	// Your custom properties - MUST be decorated with `@objc` or your apps will crash when extracting `fieldName` strings from `keyPaths`
 	@objc var userId: String = ""
 	@objc var submittingUserDisplayName = ""
 	@objc var imageURL: URL = URL(string: "https://source.unsplash.com/random/?guineapig")!

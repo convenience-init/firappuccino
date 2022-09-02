@@ -6,7 +6,7 @@ public typealias FAnalyticsEventKey = String
 public typealias FAnalyticsUserPropertyKey = String
 
 
-public protocol FAnalyticsParams {
+public protocol FAnalyticsParamsModelable {
 
 	/// Convenience method
 	/// - Returns: A dictionary containing the `FAnalytics` data to send to Firebase
@@ -17,7 +17,7 @@ public protocol FAnalyticsParams {
   
  To log an event, you can use `FAnalytics` provided static methods:
  
- ```
+ ```swift
 FAnalytics.log("post", data: [
  "title": "PostOne",
  "isDraft": true
@@ -26,14 +26,14 @@ FAnalytics.log("post", data: [
  
  If you have a model that conforms to `FAnalyticsLoggable`, you can log events using the model itself:
  
- ```
+ ```swift
  let tequila = Liquor(name: "Cuervo", proof: 181)
  FAnalytics.log("liquor_consumed", model: tequila)
  ```
  
  Alternatively, you can call the instance method on the loggable model:
  
- ```
+ ```swift
  beer.log(key: "food_eaten")
  ```
  
@@ -72,9 +72,9 @@ public struct FAnalytics {
 	 - parameter data: Any data associated with the event
 	 */
 	public static func log(_ key: FAnalyticsEventKey, data: [String: Any]? = [:]) {
-#if DEBUG
+		#if DEBUG
 		print("Don't send events...")
-#else
+		#else
 		if let lastLog = lastLog {
 			guard lastLog.distance(to: Date()) > timeout else { return }
 		}

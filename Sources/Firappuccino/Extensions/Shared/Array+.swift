@@ -1,7 +1,6 @@
 infix operator <=
 infix operator -=
 
-
 extension Array where Element: Equatable {
 	
 	internal static func <= (lhs: inout Self, rhs: Element) {

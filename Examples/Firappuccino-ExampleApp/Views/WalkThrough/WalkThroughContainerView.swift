@@ -24,10 +24,10 @@ struct WalkThroughContainerView: View {
 
 struct WalkThroughOne: View {
 	var body: some View {
-		GeometryReader { geometory in
+		GeometryReader { geometry in
 			ZStack {
 				VStack {
-					Color.appPrimary.frame(width: geometory.size.width, height: geometory.size.height * 0.6).ignoresSafeArea()
+					Color.appPrimary.frame(width: geometry.size.width, height: geometry.size.height * 0.6).ignoresSafeArea()
 					Spacer()
 				}
 				
@@ -36,7 +36,7 @@ struct WalkThroughOne: View {
 					Image("wt_image1")
 						.resizable()
 						.scaledToFit()
-						.frame(width: geometory.size.width * 0.6)
+						.frame(width: geometry.size.width * 0.6)
 						.shadowedStyle()
 					
 					Spacer(minLength: 8)
@@ -62,10 +62,10 @@ struct WalkThroughOne: View {
 
 struct WalkThroughTwo: View {
 	var body: some View {
-		GeometryReader { geometory in
+		GeometryReader { geometry in
 			ZStack {
 				VStack {
-					Color.appPrimary.frame(width: geometory.size.width, height: geometory.size.height * 0.6).ignoresSafeArea()
+					Color.appPrimary.frame(width: geometry.size.width, height: geometry.size.height * 0.6).ignoresSafeArea()
 					Spacer()
 				}
 				
@@ -74,7 +74,7 @@ struct WalkThroughTwo: View {
 					Image("wt_image2")
 						.resizable()
 						.scaledToFit()
-						.frame(width: geometory.size.width * 0.6)
+						.frame(width: geometry.size.width * 0.6)
 						.shadowedStyle()
 					
 					Spacer(minLength: 8)

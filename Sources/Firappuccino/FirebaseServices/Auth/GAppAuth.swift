@@ -98,9 +98,9 @@ public final class GAppAuth: NSObject {
 	}
 	
 	/// Continues the authorization flow (to be called from AppDelegate), i.e. in
-	///    ````
+	///    ```swift
 	///     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool
-	///    ````
+	///    ```
 	///
 	/// - parameter url: The url that's used to enter the app.
 	/// - parameter callback: A completion callback to be used for further processing.
@@ -184,6 +184,8 @@ public final class GAppAuth: NSObject {
 
 extension GAppAuth: OIDAuthStateChangeDelegate {
 	
+	/// Auth StateDidChange Callback
+	/// - Parameter state: AuthState
 	public func didChange(_ state: OIDAuthState) {
 		guard self.authorization != nil else { return }
 		

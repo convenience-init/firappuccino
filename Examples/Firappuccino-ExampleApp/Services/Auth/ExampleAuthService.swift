@@ -2,18 +2,16 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 import FirebaseFirestore
+import FirebaseAuth
 import Combine
 import Firappuccino
-
-
-
 
 final class ExampleAuthService: ObservableObject {
 	static let currentSession = ExampleAuthService()
 	
 	@Published var user: User?
 	@Published var currentUser: ExampleFUser
-	@Published var pushManager: LegacyFPNManager?
+	@Published var pushManager: FPNManager?
 	@Published var error: NSError?
 	// Signup Form
 	@Published var firstName: String = ""
@@ -77,7 +75,7 @@ final class ExampleAuthService: ObservableObject {
 		}
 	}
 	
-	@MainActor func signup(email: String, firstName: String, lastName: String, password: String, passwordConfirmation: String) async throws {
+	  @MainActor func signup(email: String, firstName: String, lastName: String, password: String, passwordConfirmation: String) async throws {
 		
 		guard password == passwordConfirmation else {
 			let error = NSError(domain: "xyz.firappuccino.ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: "Password and confirmation does not match"])
@@ -157,7 +155,7 @@ final class ExampleAuthService: ObservableObject {
 	}
 	
 	///- warning: You MUST implement a confirmation Alert in your app if you want the user to be informed before this destructive action!
-	func remove() async throws {
+	@MainActor func remove() async throws {
 		
 		do {
 			try await Firappuccino.Destroyer.`destroy`(currentUser)

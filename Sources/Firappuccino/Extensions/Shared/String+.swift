@@ -14,6 +14,10 @@ extension String {
 		return self.replacingOccurrences(of: "[^a-zA-Z0-9]", with: "", options: .regularExpression, range: nil).lowercased()
 	}
 	
+	
+	/// Generates a "random" `String` of a specified character length
+	/// - Parameter length: the number of characters in the returned `String`
+	/// - Returns: A `String` with `length` number of random characters
 	internal static func random(length: Int) -> String {
 		let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 		return String((0..<length).map{ _ in letters.randomElement()! })
@@ -82,6 +86,9 @@ extension String {
 	
 	///see also: - https://developer.apple.com/forums/thread/122005
 	// try! NSRegularExpression(pattern: #"\S*@\S*\s"#, options: []).stringByReplacingMatches(in: "1.2", withTemplate: #"$1"#))
+	
+	/// Extracts the email prefix from a valid email address
+	/// - Returns: The email address prefix, i.e. if passed `test@test.com`, "test" is returned
 	internal func getEmailPrefix() throws -> String {
 		do {
 			return try NSRegularExpression(pattern: #"\S*@\S*\s"#, options: []).stringByReplacingMatches(in: self, withTemplate: "")
@@ -92,6 +99,9 @@ extension String {
 		}
 	}
 	
+	/// Increments a scalar value
+	/// - Parameter scalarValue: The value to increment
+	/// - Returns: `String` representation of the final value
 	private func incrementScalarValue(_ scalarValue: UInt32) -> String {
 		return String(Character(UnicodeScalar(scalarValue + 1)!))
 	}

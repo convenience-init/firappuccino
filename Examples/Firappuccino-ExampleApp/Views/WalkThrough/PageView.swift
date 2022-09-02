@@ -42,7 +42,7 @@ struct PageView<Page: View>: View {
 		if isLast {
 			completeWalkThrough()
 		} else {
-			goNext()
+			pageForward()
 		}
 	}
 	
@@ -51,9 +51,15 @@ struct PageView<Page: View>: View {
 		finished = true
 	}
 	
-	private func goNext() {
+	private func pageForward() {
 		if currentPage + 1 < viewControllers.count {
 			currentPage += 1
+		}
+	}
+	
+	private func pageBackward() {
+		if currentPage > 0 {
+			currentPage -= 1
 		}
 	}
 }

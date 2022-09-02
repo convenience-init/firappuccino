@@ -14,7 +14,13 @@ extension Firappuccino {
 		
 		private static var listeners: [ListenerKey: [ListenerRegistration?]] = [:]
 		// TODO: Convert to async/await
-		///Listen to a collection of documents
+		
+		
+		/// Attaches and registers a `SnapshotListener` to and fetches the documents in, a Firestore collection.
+		/// - Parameters:
+		///   - collectionOfType: The type of the documents in the collection
+		///   - key: the `ListenerKey` to identify the listener
+		///   - onUpdate: An escaping closure containg the resultant array of fetched documents if any.
 		public static func `listen`<T>(to collectionOfType: T.Type, key: ListenerKey, onUpdate: @escaping ([T]?) -> Void) where T: FDocument {
 			let listener = db.collection(colName(of: T.self)).addSnapshotListener { snapshot, error in
 				if let error = error {
@@ -34,6 +40,12 @@ extension Firappuccino {
 			registerListener(listener, key: key)
 		}
 		
+		/// Attaches and registers a `SnapshotListener` to, and fetches, a Document of the specified Type from Firestore
+		/// - Parameters:
+		///   - id: The `id` of the document to fetch
+		///   - type: The Type of the document
+		///   - key: The `ListenerKey` to identify the listener
+		///   - onUpdate: An escaping closure containing the fetched document if it exists.
 		public static func `listen`<T>(to id: DocumentID, ofType type: T.Type, key: ListenerKey, onUpdate: @escaping (T?) -> Void) where T: FDocument {
 			let listener = db.collection(colName(of: T.self)).document(id).addSnapshotListener { snapshot, _ in
 				guard let snapshot = snapshot, snapshot.exists else {
@@ -59,6 +71,10 @@ extension Firappuccino {
 			}
 		}
 		
+		/// Listener Registration
+		/// - Parameters:
+		///   - listener: The listener to register
+		///   - key: the associated `ListenerKey`
 		internal static func registerListener(_ listener: ListenerRegistration, key: ListenerKey) {
 			if listeners[key] != nil {
 				listeners[key]?.append(listener)

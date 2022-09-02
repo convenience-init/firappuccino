@@ -25,34 +25,19 @@ extension Firappuccino {
 				throw error
 			}
 		}
-		
+
 		/**
-		 Sets a `Individuatable` in Firestore.
-		 
-		 - parameter uniqueDocument: The `Individuatable` to write in Firestore.
-		 */
-		
-		public static func `write`<T>(_ uniqueDocument: T) async throws where T: Individuatable {
-			do {
-				try await `write`(uniqueDocument, collection: "UniqueDocument", id: uniqueDocument.id)
-			}
-			catch let error as NSError {
-				Firappuccino.logger.error("\(error.localizedDescription)")
-				throw error
-			}
-		}
-		
-		/**
-		 Updates a value remotely for a particular field in Firestore with the current local value.
+		 Updates a value for a particular field in Firestore with the current local value.
 		 
 		 - parameter field: The `FieldName` to update.
 		 - parameter document: The document containing the field to update.
 		 */
-		public static func `write`<T, U>(to path: WritableKeyPath<T, U>, in document: T) async throws where T: FDocument {
-			let value = document[keyPath: path]
+		public static func `updateRemoteField`<T, U>(_ path: ReferenceWritableKeyPath<T, U>, in document: T) async throws where T: FDocument, U: Codable {
+			let fieldName: FieldName = path.fieldName
+			let localValue = document[keyPath: path]
 			let collectionName = String(describing: T.self)
 			do {
-				try await db.collection(collectionName).document(document.id).updateData([path.string: value])
+				try await db.collection(collectionName).document(document.id).updateData([fieldName: localValue])
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
@@ -67,10 +52,12 @@ extension Firappuccino {
 		 - parameter path: the `KeyPath` to the document's field in Firestore.
 		 - parameter document: The document with the field to update.
 		 */
-		public static func `write`<T, U>(value: U, using path: WritableKeyPath<T, U>, in document: T) async throws where T: FDocument, U: Codable {
+		public static func `updateField`<T, U>(_ path: ReferenceWritableKeyPath<T, U>, in document: T, with value: U) async throws where T: FDocument, U: Codable {
 			let collectionName = String(describing: T.self)
+			let fieldName: FieldName = path.fieldName
+			
 			do {
-				try await db.collection(collectionName).document(document.id).updateData([path.string: value])
+				try await db.collection(collectionName).document(document.id).updateData([fieldName: value])
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")
@@ -86,7 +73,7 @@ extension Firappuccino {
 		 - parameter path: The path of the parent document's field containing the list of `DocumentID`s.
 		 - parameter parent: The parent document containing the list of `DocumentID`s.
 		 */
-		public static func writeAndLink<T, U>(_ document: T, using path: WritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
+		public static func writeAndRelate<T, U>(_ document: T, using path: ReferenceWritableKeyPath<U, [DocumentID]>, in parent: U) async throws where T: FDocument, U: FDocument {
 			
 			do {
 				try await `write`(document)
@@ -115,8 +102,8 @@ extension Firappuccino {
 			}
 			
 			do {
-				let _ = try await db.collection(String(describing: T.self)).document(checkID).getDocument().data(as: T.self)
-				try await `write`(document)
+				let _document = try await db.collection(String(describing: T.self)).document(checkID).getDocument().data(as: T.self)
+				try await `write`(_document)
 				
 			}
 			catch let error as NSError {
@@ -130,12 +117,16 @@ extension Firappuccino {
 		///   - model: An object that adopts `FModel`.
 		///   - collection: The `String` name of the collection to `write` the document
 		///   - id: The `id` of the document to write
-		private static func `write`<T>(_ model: T, collection: CollectionName, id: String) async throws where T: FModel {
+		private static func `write`<T>(_ model: T, collection: CollectionName = "", id: String) async throws where T: FModel {
+			var _collection = collection
+			if collection.isEmpty {
+				_collection = String(describing: T.self)
+			}
 			do {
-				async let document = db.collection(collection).document(id)
-				try await document.setData(from: model)
+				let document = db.collection(_collection).document(id)
+				try document.setData(from: model)
 				
-				Firappuccino.logger.info("FDocument successfully `write` in [\(collection)] collection. ID: \(id)")
+				Firappuccino.logger.info("FDocument ID: \(id) successfully written to [\(collection)] collection.")
 			}
 			catch let error as NSError {
 				Firappuccino.logger.error("\(error.localizedDescription)")

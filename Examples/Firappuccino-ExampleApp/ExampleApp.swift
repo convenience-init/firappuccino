@@ -1,23 +1,21 @@
+import Logging
 import SwiftUI
 import Firappuccino
 import FirebaseAuth
-import Logging
+import FirebaseMessaging
 
-class AppDelegate: NSObject, UIApplicationDelegate {
-	
+class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
+
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-		
-		// Use Legacy Messaging API
+		// Legacy Messaging API
 		Configurator.useLegacyMessaging = true
 		Configurator.legacyMessagingAPIKey = AppConstants.legacyMessagingAPIKey
-		// Turn off local fCache
-//		Configurator.useCache = false
-		
+
 		// Configurate
-		Configurator.configurate(WithOptions: nil, globalOverrideLogLevel: Logger.Level.error)
-		
+		Configurator.configurate(globalOverrideLogLevel: Logger.Level.error)
+
 		// for debug
-						UserDefaults.standard.set(false, forKey: AppConstants.userDefaults.didWalkThroughKey)
+//		UserDefaults.standard.set(false, forKey: AppConstants.userDefaults.didWalkThroughKey)
 		return true
 	}
 }
@@ -37,7 +35,7 @@ struct ExampleApp: App {
 			.environmentObject(postService)
 			.onAppear {
 				FAuth.onAuthStateChanged(ofType: ExampleFUser.self) { user in
-					guard var user = user, !user.isDummy else { return }
+					guard let user = user, !user.isDummy else { return }
 					if authService.isSignupComplete == false {
 						Task {
 							user.progress = 0
@@ -46,7 +44,7 @@ struct ExampleApp: App {
 							
 							try? await user.updateDisplayName(to: user.firstName, ofUserType: ExampleFUser.self)
 							
-							try await user.writeAndIndex()
+							try await user.write()
 							
 							authService.currentUser = user
 							authService.firstName = ""
@@ -58,9 +56,9 @@ struct ExampleApp: App {
 						authService.currentUser = user
 					}
 					
-					//Legacy FPN Messaging
+					//FPN Messaging
 					if let userId = Auth.auth().currentUser?.uid {
-						authService.pushManager = LegacyFPNManager(userID: userId)
+						authService.pushManager = FPNManager(userID: userId)
 						Task {
 							try? await authService.pushManager?.registerForPushNotifications()
 						}
@@ -69,5 +67,36 @@ struct ExampleApp: App {
 				}
 			}
 		}
+	}
+}
+
+extension AppDelegate {
+	// Receive displayed notifications for iOS 10 devices.
+	func userNotificationCenter(_ center: UNUserNotificationCenter,
+								willPresent notification: UNNotification,
+								withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions)
+								-> Void) {
+		let userInfo = notification.request.content.userInfo
+
+		if let messageID = userInfo[AppConstants.gcmMessageIDKey] {
+			print("Message ID: \(messageID)")
+		}
+		// Print full message.
+		print(userInfo)
+
+		// Change this to your preferred presentation option
+		completionHandler([[.banner, .sound, .badge, .alert]])
+
+	}
+
+	func userNotificationCenter(_ center: UNUserNotificationCenter,
+								didReceive response: UNNotificationResponse,
+								withCompletionHandler completionHandler: @escaping () -> Void) {
+		let userInfo = response.notification.request.content.userInfo
+
+		// Print full message.
+		Firappuccino.logger.info("\(userInfo)")
+
+		completionHandler()
 	}
 }
