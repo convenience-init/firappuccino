@@ -12,7 +12,7 @@
 public typealias FPNMessageCategory = String
 
 
-/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app. This Service uses the V1 API, as the Legacy API's deprecation is looming. Until then, feel free to use the `FPNManager` and `LegacyFPNSender`
+/// A Notification sent from one `FUser` to another which can be programatically triggered by any event from within your app.
 ///
 /// "*FUser X* liked your content *XXX*!"
 ///
@@ -62,7 +62,9 @@ public class FPNMessage: NSObject, FModel {
 	/// Whether the notification has been read
 	public var read: Bool = false
 	
-	public init<T>(_ title: String = "", messageBody: String, sender sendingUser: T, category: FPNMessageCategory, imageFromURL: String? = nil, additionalInfo: String? = nil) where T: FUser {
+	
+	public init<T>(_ title: String = "", messageBody: String, sender sendingUser: T, category: FPNMessageCategory, imageFromURL: String? = Configurator.configuration?.imagePath, additionalInfo: String? = nil) where T: FUser {
+		
 		self.title = title
 		self.user = sendingUser.id
 		self.messageBody = messageBody

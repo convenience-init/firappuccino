@@ -12,9 +12,11 @@ public struct Firappuccino {
 	public static let sender = LegacyFPNSender()
 	
 	public static let logger = Logger(label: "uno.cuatrotresdos.firappuccino.main")
-	
-	/// The `Firestore` Database
-	public static let db = Firestore.firestore()
+
+/// The `Firestore` Database
+	public static var db = {
+		Firestore.firestore()
+	}()
 	
 	/// Fetches the contents of an `Array` field from a `FDocument` stored in `Firestore`.
 	/// - Parameters:

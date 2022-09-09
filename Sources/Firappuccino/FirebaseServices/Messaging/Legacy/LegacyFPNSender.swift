@@ -17,7 +17,7 @@ public class LegacyFPNSender: FPNSendable {
 	}
 	
 	private func sendNotification<T>(to user: T, title: String, body: String, data: [AnyHashable: Any] = [:]) where T: FUser {
-		guard !Configurator.legacyMessagingAPIKey.isEmpty else {
+		guard let legacyKey = Configurator.configuration?.legacyAPIKey, !legacyKey.isEmpty else {
 			return Firappuccino.logger.critical("No Legacy MessagingAPI Key has been set! Ensure that `Configurator.legacyMessagingAPIKey` is set before using Legacy API Messaging.")
 			
 		}
@@ -41,7 +41,7 @@ public class LegacyFPNSender: FPNSendable {
 		request.httpMethod = "POST"
 		request.httpBody = try? JSONSerialization.data(withJSONObject: paramString, options: [.prettyPrinted])
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.setValue("key=\(Configurator.legacyMessagingAPIKey)", forHTTPHeaderField: "Authorization")
+		request.setValue("key=\(legacyKey)", forHTTPHeaderField: "Authorization")
 		let task = URLSession.shared.dataTask(with: request as URLRequest) { data, _, _ in
 			do {
 				if let jsonData = data {

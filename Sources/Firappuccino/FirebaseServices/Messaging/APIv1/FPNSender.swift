@@ -17,6 +17,8 @@ public struct FPNSender: FPNSendable {
 	/// The Name of the Firebase Project Associated with your App
 	public static var projectName: String = ""
 	
+//	private static var customImagePath = URL(fileURLWithPath: customImagePath).absoluteURL
+	
 	/// The OAuth 2.0 Bearer Token generated from public/private keypair
 	private static var bearerToken: String = ""
 	

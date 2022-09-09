@@ -1,19 +1,21 @@
 import Logging
 import SwiftUI
 import Firappuccino
+import FirebaseCore
 import FirebaseAuth
 import FirebaseMessaging
 
 class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-		// Legacy Messaging API
-		Configurator.useLegacyMessaging = true
-		Configurator.legacyMessagingAPIKey = AppConstants.legacyMessagingAPIKey
-
+		
 		// Configurate
-		Configurator.configurate(globalOverrideLogLevel: Logger.Level.error)
-
+		
+		/// Configuration
+		let exampleAppConfig = Configuration(legacyFPN: true, legacyAPIKey: AppConstants.legacyMessagingAPIKey, imagePath: AppConstants.imagePath, iss: AppConstants.iss, projectName: AppConstants.projectID, privateKey: AppConstants.privateKeyPath, publicKey: AppConstants.publicKeyPath, gcmIdKey: AppConstants.gcmMessageIDKey, clientID: AppConstants.clientID, globalOverrideLogLevel: Logger.Level.error)
+		
+		Configurator.configurate(configuration: exampleAppConfig)
+		
 		// for debug
 //		UserDefaults.standard.set(false, forKey: AppConstants.userDefaults.didWalkThroughKey)
 		return true
@@ -70,33 +72,3 @@ struct ExampleApp: App {
 	}
 }
 
-extension AppDelegate {
-	// Receive displayed notifications for iOS 10 devices.
-	func userNotificationCenter(_ center: UNUserNotificationCenter,
-								willPresent notification: UNNotification,
-								withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions)
-								-> Void) {
-		let userInfo = notification.request.content.userInfo
-
-		if let messageID = userInfo[AppConstants.gcmMessageIDKey] {
-			print("Message ID: \(messageID)")
-		}
-		// Print full message.
-		print(userInfo)
-
-		// Change this to your preferred presentation option
-		completionHandler([[.banner, .sound, .badge, .alert]])
-
-	}
-
-	func userNotificationCenter(_ center: UNUserNotificationCenter,
-								didReceive response: UNNotificationResponse,
-								withCompletionHandler completionHandler: @escaping () -> Void) {
-		let userInfo = response.notification.request.content.userInfo
-
-		// Print full message.
-		Firappuccino.logger.info("\(userInfo)")
-
-		completionHandler()
-	}
-}

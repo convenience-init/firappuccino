@@ -11,14 +11,13 @@ public protocol FPNSendable {
 public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
 	let userID: String
 	
-	let sender: FPNSendable = Configurator.useLegacyMessaging ? LegacyFPNSender() : FPNSender()
+	let sender: FPNSendable = Configurator.configuration!.legacyFPN ? LegacyFPNSender() : FPNSender()
 	
 	let v1Sender = FPNSender()
 	let legacySender = LegacyFPNSender()
 	
 	public init(userID: String) {
 		self.userID = userID
-		
 		super.init()
 	}
 	
@@ -28,14 +27,12 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 		Messaging.messaging().delegate = self
 		
-		let authOptions: UNAuthorizationOptions = Configurator.authOptions
+		let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
 		
 		try await UNUserNotificationCenter.current().requestAuthorization(options: authOptions)
 		
 		try await FPNSender.subscribe(to: ["all"])
-		
-		try await updateFirestorePushTokenIfNeeded()
-		
+				
 		await UIApplication.shared.registerForRemoteNotifications()
 		
 		let settings = await UNUserNotificationCenter.current().notificationSettings()
@@ -50,19 +47,6 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 		Firappuccino.logger.info("Sound setting is \(soundEnabled)")
 		
-	}
-	
-	func updateFirestorePushTokenIfNeeded() async throws {
-		if let fcmToken = Messaging.messaging().fcmToken {
-			print("Firebase registration token: \(String(describing: fcmToken))")
-			
-			let dataDict: [String: String] = ["token": fcmToken ]
-			NotificationCenter.default.post(
-				name: Notification.Name("FCMToken"),
-				object: nil,
-				userInfo: dataDict
-			)
-		}
 	}
 	
 	func application(_ application: UIApplication,
@@ -86,7 +70,7 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 					 -> Void) {
 		
 		// Print message ID.
-		if let messageID = userInfo[Configurator.gcmMessageIDKey] {
+		if let messageID = userInfo[Configurator.configuration?.gcmIdKey] {
 			Firappuccino.logger.info("Message ID: \(messageID)")
 		}
 		
@@ -117,7 +101,7 @@ public extension FPNManager {
 								-> Void) {
 		let userInfo = notification.request.content.userInfo
 		
-		if let messageID = userInfo[Configurator.gcmMessageIDKey] {
+		if let messageID = userInfo[Configurator.configuration?.gcmIdKey] {
 			Firappuccino.logger.info("Message ID: \(messageID)")
 		}
 		// Print full message.
@@ -155,19 +139,16 @@ extension FPNManager {
 	public static func sendUserMessage<T, U>(from sender: T, to recipient: U, messageBody: String, attachmentImageURL: URL?, additionalInfo: String?) async throws where T: FUser, U: FUser {
 		
 		do {
-//			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
+			let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
 			
-			switch Configurator.useLegacyMessaging {
+			switch Configurator.configuration!.legacyFPN {
 					
 				case true:
 					// Legacy API
-					let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: URL(string: "https://firebasestorage.googleapis.com/v0/b/hilarist-authentication.appspot.com/o/FCMImages%2FHilaristPreviewProfileImage.png?alt=media&token=0d1a5276-4cea-4562-a0d2-c14c5cc6571b")?.absoluteString, additionalInfo: additionalInfo)
-					
 					try await Firappuccino.sender.send(message, to: recipient, data: ["count": recipient.notifications.filter({ !$0.read }).count])
 					
 				case false:
 					//TODO: - Add a `category` enum
-					let message = FPNMessage("", messageBody: messageBody, sender: sender, category: "all", imageFromURL: attachmentImageURL?.absoluteString, additionalInfo: additionalInfo)
 					
 					try await FPNSender.sendUserActionMessagingNotification(message: message, to: recipient, withData: ["count": recipient.notifications.filter({ !$0.read }).count])
 			}

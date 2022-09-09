@@ -16,7 +16,7 @@ final class ExamplePostRepository: ObservableObject {
 	
 	private var userId = ""
 	private let authService = ExampleAuthService.currentSession
-	private let store = Firappuccino.db
+	private lazy var store = { return Firappuccino.db }()
 	
 	init() {
 		// assigns `user.id` to `repository.userId` binding the user and repository
@@ -142,7 +142,7 @@ extension ExamplePostRepository {
 			
 			let recipient = try await fetchUser(id: postToLike.userId)
 			
-			try await sendFPNMessage(to: recipient, messageBody: "liked your Post: '\(postToLike.title)'!!", attachmentImageURL: nil, additionalInfo: "Sending and recieving Cloud Messages like this one using the v1 or Legacy Firebase Messaging API / APNs is a breeze with the Firappuccino framework...")
+			try await sendFPNMessage(to: recipient, messageBody: "liked your Post: '\(postToLike.title)'!!", attachmentImageURL: AppConstants.placeholderPostImageUrl?.absoluteURL, additionalInfo: " Sending and receiving Cloud Messages is a breeze with the Firappuccino framework...")
 		}
 		catch let error as NSError {
 			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])

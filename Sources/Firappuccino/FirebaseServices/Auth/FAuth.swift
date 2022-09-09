@@ -31,6 +31,7 @@ public class FAuth: NSObject {
 	
 	internal var currentNonce: String?
 	
+	internal static var clientID: String = ""
 	/**
 	 Create a new `FirebaseAuth` account using email authorization flow.
 	 
@@ -130,7 +131,8 @@ public class FAuth: NSObject {
 	}
 	
 	/// Prepares GoogleAppAuth
-	internal static func prepare() {
+	internal static func prepare(with clientID: String) {
+		self.clientID = clientID
 		GAppAuth.shared.appendAuthorizationRealm(OIDScopeEmail)
 		GAppAuth.shared.retrieveExistingAuthorizationState()
 	}
