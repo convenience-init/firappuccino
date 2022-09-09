@@ -1,4 +1,5 @@
 .DS_Store
+/Examples/Firappuccino-ExampleApp/AppConstants.swift
 /.build
 /Packages
 /*.xcodeproj
