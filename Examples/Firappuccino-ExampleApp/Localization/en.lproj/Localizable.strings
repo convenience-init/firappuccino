@@ -1,10 +1,10 @@
 /// Walkthrough
-"WTTitle1" = "Welcome to Firappuccino!";
-"WTDesc11" = "The Swifty, Protocol-Oriented Library that has everything you need to get up and building a full-featured, production-grade SwiftUI app using any combination of Firebase Service in about as much time as it takes to drink your morning cup of joe.";
-"WTDesc12" = "(or tea, as the case may be...)";
-"WTTitle2" = "Firappuccino's Swifty syntax offers high utility with minimal code";
-"WTDesc21" = "Easily implement Auth, Cloud Messaging, Querying, Document and Collection Listening, Custom Analytics, unified logging, pseudo-relationships, attaching images to documents, unique document storage, extensible user base class, and an optional local cache to help reduce service usage costs!";
-"WTDesc22" = "Firappuccino is written using some of the latest Swift features and is regularly updated as the Swift language evolves!";
+"WTTitle1" = "Send in the troops, they'll shut the system down!";
+"WTDesc11" = "You've become an island in the hazy world surrounding me";
+"WTDesc12" = "I might be on a side street or a stairway to the stars";
+"WTTitle2" = "A big ten kegger at the frat, or watching Jerry shake his fat";
+"WTDesc21" = "Can lift me up and spin me around It's the ocean flowing in our veins and it's the salt that's in our tears Things are falling down on me, heavy things I could not see She started the ignition and without permission!";
+"WTDesc22" = "I never want my hand cut off, I never want a hacking cough!";
 
 /// Add Post Alert
 "AddTitle" = "Enter a title";
