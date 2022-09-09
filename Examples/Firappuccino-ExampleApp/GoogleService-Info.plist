@@ -3,32 +3,34 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>10095415638-e0o8v95buts4qagu6qqk9t2o5be0hqpn.apps.googleusercontent.com</string>
+	<string>0000000000000-00000000000000000000000000000000.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.10095415638-e0o8v95buts4qagu6qqk9t2o5be0hqpn</string>
+	<string>com.googleusercontent.apps.0000000000000-00000000000000000000000000000000</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBhoYnRt_pIQbEavlhtDWY3N171pl-to30</string>
+	<string>A00000000000000000-00000000000-000000000</string>
 	<key>GCM_SENDER_ID</key>
-	<string>10095415638</string>
+	<string>0000000000000</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.firappuccino.Firappuccino-ExampleApp</string>
+	<string>com.firappuccino.AppStarterTemplate</string>
 	<key>PROJECT_ID</key>
-	<string>hilarist-authentication</string>
+	<string>testapp-00000</string>
 	<key>STORAGE_BUCKET</key>
-	<string>hilarist-authentication.appspot.com</string>
+	<string>testapp-00000.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:10095415638:ios:4aa5cc494103b3cc6986f7</string>
+	<string>0:0000000000000:ios:0000000000000000</string>
+	<key>DATABASE_URL</key>
+	<string>https://testapp-00000.firebaseio.com</string>
 </dict>
 </plist>
