@@ -33,14 +33,15 @@ let package = Package(
 				.product(name: "FirebaseStorageSwift-Beta", package: "firebase-ios-sdk"),
 				.product(name: "FirebaseAnalytics", package: "firebase-ios-sdk"),
 				.product(name: "FirebaseAnalyticsSwift-Beta", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseFunctions", package: "firebase-ios-sdk"),
+				.product(name: "FirebaseFunctionsSwift-Beta", package: "firebase-ios-sdk"),
 				.product(name: "GTMAppAuth", package: "GTMAppAuth"),
 				.product(name: "AppAuth", package: "AppAuth-iOS"),
 				.product(name: "SwiftJWT", package: "Swift-JWT"),
 				.product(name: "Logging", package: "swift-log"),
 			]),
-		
-			.testTarget(
-				name: "FirappuccinoTests",
-				dependencies: ["Firappuccino"]),
+//			.testTarget(
+//				name: "FirappuccinoTests",
+//				dependencies: ["Firappuccino"]),
 	]
 )

@@ -1,0 +1,16 @@
+/// Walkthrough
+"WTTitle1" = "Welcome to Firappuccino!";
+"WTDesc11" = "The Swifty, Protocol-Oriented Library that has everything you need to get up and building a full-featured, production-grade SwiftUI app using any combination of Firebase Service in about as much time as it takes to drink your morning cup of joe.";
+"WTDesc12" = "(or tea, as the case may be...)";
+"WTTitle2" = "Firappuccino's Swifty syntax offers high utility with minimal code";
+"WTDesc21" = "Easily implement Auth, Cloud Messaging, Querying, Document and Collection Listening, Custom Analytics, unified logging, pseudo-relationships, attaching images to documents, unique document storage, extensible user base class, and an optional local cache to help reduce service usage costs!";
+"WTDesc22" = "Firappuccino is written using some of the latest Swift features and is regularly updated as the Swift language evolves!";
+
+/// Add Post Alert
+"AddTitle" = "Enter a title";
+"AddTitleDesc" = "Please enter a title and message to create a post";
+"AddMessage" = "Enter a message";
+"AddMessageDesc" = "Please enter a short message for the body of your post.";
+"Cancel" = "Cancel";
+"Add" = "Add";
+

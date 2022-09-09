@@ -8,9 +8,9 @@ public typealias ResourcePath = String
  
  Use this class with ``FirappuccinoResourceStore``!
  
- A `FirappuccinoStorageResource` contains the logic to "package" resources to be "attached" to a `FirappuccinoDocument` and uploaded to Firebase Storage, but are not intended to be uploaded themselves.
+ A `FirappuccinoStorageResource` contains the logic to "package" resources to be "attached" to a `FDocument` and uploaded to Firebase Storage, but are not intended to be uploaded themselves.
  */
-public class FirappuccinoStorageResource: FirappuccinoDocumentModel {
+public class FirappuccinoStorageResource: NSObject, FModel {
 	
 	/// The url of the resource.
 	public var url: URL?
@@ -65,21 +65,21 @@ public class FirappuccinoStorageResource: FirappuccinoDocumentModel {
 	}
 	
 	
-	/// Adds an .png resource "attachment" to a `FirappuccinoDocument`
+	/// Adds an .png resource "attachment" to a `FDocument`
 	/// - Parameters:
-	///   - document: The `FirappuccinoDocument` to attach the .png file to
+	///   - document: The `FDocument` to attach the .png file to
 	///   - data: The .png imageData
 	///   - andPath: The `CollectionName` to upload the attachment to
 	///   - progress: The progress of the `FIRUploadTask`
 	/// - Returns: An optional valid `URL` if successful
 	/// - Throws: An `NSError`
-	public static func attachImageResource<T>(to document: T, using data: Data, andPath: String, progress: @escaping (Double) -> Void = { _ in }) async throws -> URL? where T: FirappuccinoDocument {
+	public static func attachImageResource<T>(to document: T, using data: Data, andPath: String, progress: @escaping (Double) -> Void = { _ in }) async throws -> URL? where T: FDocument {
 		
 		let document = document
 		do {
-			async let resourceURL = await FirappuccinoResourceStore.put(data, to: FirappuccinoStorageResource(id: document.id, folder: andPath), progress: progress)
-			try await document.set()
-			return await resourceURL
+			let resourceURL = await FirappuccinoResourceStore.put(data, to: FirappuccinoStorageResource(id: document.id, folder: andPath), progress: progress)
+			try await document.`write`()
+			return resourceURL
 		}
 		catch let error as NSError {
 			Firappuccino.logger.error("\(error.localizedDescription)")
