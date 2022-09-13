@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-	@State private var onboarded: Bool = UserDefaults.standard.bool(forKey: AppConstants.userDefaults.didWalkThroughKey)
+	@State private var onboarded: Bool = UserDefaults.standard.bool(forKey: ExampleAppConstants.userDefaults.didWalkThroughKey)
 	
 	var body: some View {
 		ZStack {

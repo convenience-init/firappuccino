@@ -12,7 +12,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
 		// Configurate
 		
 		/// Configuration
-		let exampleAppConfig = Configuration(legacyFPN: true, legacyAPIKey: AppConstants.legacyMessagingAPIKey, imagePath: AppConstants.imagePath, iss: AppConstants.iss, projectName: AppConstants.projectID, privateKey: AppConstants.privateKeyPath, publicKey: AppConstants.publicKeyPath, gcmIdKey: AppConstants.gcmMessageIDKey, clientID: AppConstants.clientID, globalOverrideLogLevel: Logger.Level.error)
+		let exampleAppConfig = Configuration(legacyFPN: true, legacyAPIKey: ExampleAppConstants.legacyMessagingAPIKey, imagePath: ExampleAppConstants.imagePath, iss: ExampleAppConstants.iss, projectName: ExampleAppConstants.projectID, privateKey: ExampleAppConstants.privateKeyPath, publicKey: ExampleAppConstants.publicKeyPath, gcmIdKey: ExampleAppConstants.gcmMessageIDKey, clientID: ExampleAppConstants.clientID, globalOverrideLogLevel: Logger.Level.error)
 		
 		Configurator.configurate(configuration: exampleAppConfig)
 		

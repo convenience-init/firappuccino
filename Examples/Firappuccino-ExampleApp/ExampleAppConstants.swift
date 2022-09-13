@@ -1,6 +1,6 @@
 import UIKit
 
-struct AppConstants {
+struct ExampleAppConstants {
 	
 	struct userDefaults {
 		static let didWalkThroughKey = ""
