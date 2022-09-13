@@ -1,5 +1,7 @@
 #if !os(macOS)
 import UIKit
+#endif
+
 import Firebase
 import FirebaseMessaging
 import UserNotifications
@@ -160,5 +162,4 @@ extension FPNManager {
 	}
 }
 
-#endif
 

@@ -181,6 +181,7 @@ public struct FPNSender: FPNSendable {
 		request.httpBody = postData as Data
 		
 		let session = URLSession.shared
+
 		let dataTask = session.dataTask(with: request as URLRequest) { data, _, _ in
 			do {
 				if let jsonData = data {
