@@ -1,6 +1,6 @@
-#if os(iOS)
+//#if !os(macOS)
 import UIKit
-#endif
+//#endif
 import Foundation
 import Firebase
 import FirebaseMessaging
