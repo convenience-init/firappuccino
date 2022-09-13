@@ -1,22 +1,35 @@
-#if !os(macOS)
+#if os(iOS)
 import UIKit
 #endif
-
+import Foundation
 import Firebase
 import FirebaseMessaging
 import UserNotifications
 
 public protocol FPNSendable {
-	
 }
 
 public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
 	let userID: String
+
+	private let defaultSender: FPNSendable = LegacyFPNSender()
 	
-	let sender: FPNSendable = Configurator.configuration!.legacyFPN ? LegacyFPNSender() : FPNSender()
+	public var sender: FPNSendable {
+		let shouldUseLegacySender = Configurator.configuration?.legacyFPN
+		guard shouldUseLegacySender != nil else {
+			return defaultSender
+		}
+		switch Configurator.configuration!.legacyFPN {
+				
+			case true:
+				return LegacyFPNSender()
+			case false:
+				return FPNSender()
+		}
+	}
 	
-	let v1Sender = FPNSender()
-	let legacySender = LegacyFPNSender()
+	public let v1Sender: FPNSendable = FPNSender()
+	public let legacySender: FPNSendable = LegacyFPNSender()
 	
 	public init(userID: String) {
 		self.userID = userID
@@ -110,7 +123,8 @@ public extension FPNManager {
 		Firappuccino.logger.info("\(userInfo)")
 		
 		// Change this to your preferred presentation option
-		completionHandler([[.banner, .sound, .badge, .alert]])
+//		completionHandler([[.banner, .sound, .badge, .alert]])
+		completionHandler([[.banner, .sound, .badge]])
 		
 	}
 	
