@@ -1,6 +1,8 @@
 #if !os(macOS)
 import UIKit
 #endif
+import Foundation
+
 public class LegacyFPNSender: FPNSendable {
 	/*
 	 The `FUser` recipient must have a `deviceToken` property available in their user object. The `deviceToken` is automatically generated upon login, uploaded to Firestore, and managed by `FPNManager`.
