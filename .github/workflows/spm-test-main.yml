@@ -1,4 +1,4 @@
-name: Swift Package Main Branch
+name: Swift Package Main Branch Workflow
 
 on:
   push:
