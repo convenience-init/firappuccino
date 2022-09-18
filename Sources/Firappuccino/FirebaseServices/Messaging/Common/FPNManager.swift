@@ -1,6 +1,11 @@
-//#if !os(macOS)
+#if os(macOS)
+import AppKit
+#endif
+
+#if os(iOS)
 import UIKit
-//#endif
+#endif
+
 import Foundation
 import Firebase
 import FirebaseMessaging
@@ -19,12 +24,13 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		guard shouldUseLegacySender != nil else {
 			return defaultSender
 		}
-		switch Configurator.configuration!.legacyFPN {
+		switch Configurator.configuration?.legacyFPN {
 				
 			case true:
 				return LegacyFPNSender()
 			case false:
 				return FPNSender()
+			default: fatalError("No Configuration Found!")
 		}
 	}
 	

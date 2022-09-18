@@ -1,7 +1,11 @@
-//#if !os(macOS)
-import UIKit
-//#endif
 import Foundation
+#if os(macOS)
+import AppKit
+#endif
+
+#if os(iOS)
+import UIKit
+#endif
 
 public class LegacyFPNSender: FPNSendable {
 	/*

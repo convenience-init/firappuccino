@@ -2,7 +2,6 @@ import Firebase
 import FirebaseMessaging
 import SwiftJWT
 
-
 public struct FPNSender: FPNSendable {
 	
 	/// The Relative path to the private `._key` file for Google Service Account
