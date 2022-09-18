@@ -2,9 +2,13 @@ name: Swift Package Main Branch Workflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "main" 
+    paths:
+      - ".github/workflows/spm-test-main.yaml"
 
 jobs:
   build:
