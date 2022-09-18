@@ -6,7 +6,11 @@ import AppKit
 import UIKit
 #endif
 
-//import UIKit
+#if os(iOS)
+import UIKit
+#endif
+
+import Foundation
 import Firebase
 import FirebaseMessaging
 import UserNotifications
@@ -14,7 +18,7 @@ import UserNotifications
 public protocol FPNSendable {
 }
 
-public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate, UIApplicationDelegate {
+public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
 	let userID: String
 
 	private let defaultSender: FPNSendable = LegacyFPNSender()
@@ -54,8 +58,7 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 		try await FPNSender.subscribe(to: ["all"])
 				
-		//await
-		UIApplication.shared.registerForRemoteNotifications()
+		await UIApplication.shared.registerForRemoteNotifications()
 		
 		let settings = await UNUserNotificationCenter.current().notificationSettings()
 		
@@ -71,12 +74,12 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 	}
 	
-	public func application(_ application: UIApplication,
+	func application(_ application: UIApplication,
 					 didFailToRegisterForRemoteNotificationsWithError error: Error) {
 		Firappuccino.logger.warning("Failed to register for remote notifications with error \(error)")
 	}
 	
-	public func application(_ application: UIApplication,
+	func application(_ application: UIApplication,
 					 didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 		var readableToken: String = ""
 		for i in 0..<deviceToken.count {
@@ -86,7 +89,7 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		Firappuccino.logger.info("Received an APNs device token: \(readableToken)")
 	}
 	
-	public func application(_ application: UIApplication,
+	func application(_ application: UIApplication,
 					 didReceiveRemoteNotification userInfo: [AnyHashable: Any],
 					 fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
 					 -> Void) {
