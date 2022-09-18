@@ -1,4 +1,4 @@
-name: Swift
+name: Swift Package Develop Branch Workflow
 
 on:
   push:
