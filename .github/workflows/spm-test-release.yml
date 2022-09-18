@@ -1,4 +1,4 @@
-name: Swift Package Release
+name: Swift Package Release Branch Workflow
 
 on:
   push:
