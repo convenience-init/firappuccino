@@ -6,7 +6,7 @@ import AppKit
 import UIKit
 #endif
 
-import Foundation
+//import UIKit
 import Firebase
 import FirebaseMessaging
 import UserNotifications
@@ -14,7 +14,7 @@ import UserNotifications
 public protocol FPNSendable {
 }
 
-public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
+public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate, UIApplicationDelegate {
 	let userID: String
 
 	private let defaultSender: FPNSendable = LegacyFPNSender()
@@ -54,7 +54,8 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 		try await FPNSender.subscribe(to: ["all"])
 				
-		await UIApplication.shared.registerForRemoteNotifications()
+		//await
+		UIApplication.shared.registerForRemoteNotifications()
 		
 		let settings = await UNUserNotificationCenter.current().notificationSettings()
 		
@@ -70,12 +71,12 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		
 	}
 	
-	func application(_ application: UIApplication,
+	public func application(_ application: UIApplication,
 					 didFailToRegisterForRemoteNotificationsWithError error: Error) {
 		Firappuccino.logger.warning("Failed to register for remote notifications with error \(error)")
 	}
 	
-	func application(_ application: UIApplication,
+	public func application(_ application: UIApplication,
 					 didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 		var readableToken: String = ""
 		for i in 0..<deviceToken.count {
@@ -85,7 +86,7 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		Firappuccino.logger.info("Received an APNs device token: \(readableToken)")
 	}
 	
-	func application(_ application: UIApplication,
+	public func application(_ application: UIApplication,
 					 didReceiveRemoteNotification userInfo: [AnyHashable: Any],
 					 fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
 					 -> Void) {
