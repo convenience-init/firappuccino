@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC06B65D28DCC8570014BA61 /* messageSendPrivate._key in Resources */ = {isa = PBXBuildFile; fileRef = DC06B65B28DCC8570014BA61 /* messageSendPrivate._key */; };
+		DC06B65E28DCC8570014BA61 /* messageSendPublic._key in Resources */ = {isa = PBXBuildFile; fileRef = DC06B65C28DCC8570014BA61 /* messageSendPublic._key */; };
 		DC0BE6A128BFE39500EA339D /* TabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BE6A028BFE39500EA339D /* TabItem.swift */; };
 		DC0BE6A428C0329800EA339D /* LoginOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BE6A328C0329800EA339D /* LoginOptions.swift */; };
 		DC0BE6A628C0330200EA339D /* AuthenticationType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BE6A528C0330200EA339D /* AuthenticationType.swift */; };
@@ -38,7 +40,7 @@
 		DC0CA02928B94A4000E1F08A /* ExamplePostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0CA00A28B94A4000E1F08A /* ExamplePostRepository.swift */; };
 		DC0CA02A28B94A4000E1F08A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC0CA00C28B94A4000E1F08A /* Preview Assets.xcassets */; };
 		DC0CA02B28B94A4000E1F08A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DC0CA00E28B94A4000E1F08A /* Localizable.strings */; };
-		DC0CA02E28B9568D00E1F08A /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0CA02D28B9568D00E1F08A /* AppConstants.swift */; };
+		DC0CA02E28B9568D00E1F08A /* ExampleAppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0CA02D28B9568D00E1F08A /* ExampleAppConstants.swift */; };
 		DC6357FD28B06714002D53FB /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6357FC28B06714002D53FB /* ExampleApp.swift */; };
 		DC6357FF28B06714002D53FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6357FE28B06714002D53FB /* ContentView.swift */; };
 		DC63580128B06716002D53FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC63580028B06716002D53FB /* Assets.xcassets */; };
@@ -60,6 +62,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DC06B65B28DCC8570014BA61 /* messageSendPrivate._key */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = messageSendPrivate._key; sourceTree = "<group>"; };
+		DC06B65C28DCC8570014BA61 /* messageSendPublic._key */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = messageSendPublic._key; sourceTree = "<group>"; };
 		DC0BE6A028BFE39500EA339D /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
 		DC0BE6A328C0329800EA339D /* LoginOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginOptions.swift; sourceTree = "<group>"; };
 		DC0BE6A528C0330200EA339D /* AuthenticationType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationType.swift; sourceTree = "<group>"; };
@@ -92,7 +96,7 @@
 		DC0CA00C28B94A4000E1F08A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DC0CA00F28B94A4000E1F08A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DC0CA01028B94A4000E1F08A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DC0CA02D28B9568D00E1F08A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		DC0CA02D28B9568D00E1F08A /* ExampleAppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleAppConstants.swift; sourceTree = "<group>"; };
 		DC32284728B4286A0099F6BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DC6357F928B06714002D53FB /* Firappuccino-ExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firappuccino-ExampleApp.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC6357FC28B06714002D53FB /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
@@ -285,6 +289,8 @@
 			children = (
 				DC0BE6A828C04EB200EA339D /* Firappuccino-ExampleApp.entitlements */,
 				DCDB7B8628B491A400B42A53 /* GoogleService-Info.plist */,
+				DC06B65B28DCC8570014BA61 /* messageSendPrivate._key */,
+				DC06B65C28DCC8570014BA61 /* messageSendPublic._key */,
 				DC32284728B4286A0099F6BE /* Info.plist */,
 				DC0CA01028B94A4000E1F08A /* Assets.xcassets */,
 				DC0C9FF228B94A4000E1F08A /* Animations */,
@@ -296,7 +302,7 @@
 				DC0C9FEF28B94A4000E1F08A /* Services */,
 				DC0C9FEA28B94A4000E1F08A /* Utils */,
 				DC0C9FFA28B94A4000E1F08A /* Views */,
-				DC0CA02D28B9568D00E1F08A /* AppConstants.swift */,
+				DC0CA02D28B9568D00E1F08A /* ExampleAppConstants.swift */,
 				DC6357FE28B06714002D53FB /* ContentView.swift */,
 				DC6357FC28B06714002D53FB /* ExampleApp.swift */,
 				DC63580028B06716002D53FB /* Assets.xcassets */,
@@ -428,6 +434,8 @@
 				DC0CA02A28B94A4000E1F08A /* Preview Assets.xcassets in Resources */,
 				DC0CA01828B94A4000E1F08A /* loading.json in Resources */,
 				DCDB7B8728B491A500B42A53 /* GoogleService-Info.plist in Resources */,
+				DC06B65E28DCC8570014BA61 /* messageSendPublic._key in Resources */,
+				DC06B65D28DCC8570014BA61 /* messageSendPrivate._key in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,7 +478,7 @@
 				DC0CA02928B94A4000E1F08A /* ExamplePostRepository.swift in Sources */,
 				DC8EAE4C28B9D2CE0046228F /* AuthView.swift in Sources */,
 				DC0CA02028B94A4000E1F08A /* WalkThroughContainerView.swift in Sources */,
-				DC0CA02E28B9568D00E1F08A /* AppConstants.swift in Sources */,
+				DC0CA02E28B9568D00E1F08A /* ExampleAppConstants.swift in Sources */,
 				DC0CA01C28B94A4000E1F08A /* View+.swift in Sources */,
 				DC0CA01D28B94A4000E1F08A /* Array+.swift in Sources */,
 				DC0CA02128B94A4000E1F08A /* PageViewController.swift in Sources */,

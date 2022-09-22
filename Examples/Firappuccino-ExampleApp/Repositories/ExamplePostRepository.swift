@@ -142,7 +142,7 @@ extension ExamplePostRepository {
 			
 			let recipient = try await fetchUser(id: postToLike.userId)
 			
-			try await sendFPNMessage(to: recipient, messageBody: "liked your Post: '\(postToLike.title)'!!", attachmentImageURL: ExampleAppConstants.placeholderPostImageUrl?.absoluteURL, additionalInfo: " Sending and receiving Cloud Messages is a breeze with the Firappuccino framework...")
+			try await sendFPNMessage(to: recipient, messageBody: "liked your Post: '\(postToLike.title)'!!", attachmentImageURL: ExampleAppConstants.shared.placeholderPostImageUrl.absoluteURL, additionalInfo: " Sending and receiving Cloud Messages is a breeze with the Firappuccino framework...")
 		}
 		catch let error as NSError {
 			self.error = NSError(domain: "xyz.firappuccino.Firappuccino-ExampleApp", code: 666, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])

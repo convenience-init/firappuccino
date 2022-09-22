@@ -1,7 +1,6 @@
 @_exported import AppAuth
 @_exported import GTMAppAuth
 
-#if os(iOS)
 import UIKit
 /// Wrapper class that provides convenient AppAuth functionality with Google Services.
 /// Set `ClientId`, `RedirectUri` and call respective methods where you need them.
@@ -217,8 +216,6 @@ extension GAppAuth: OIDAuthStateErrorDelegate {
 private enum GoogleAppAuthError: Error {
 	case plistValueEmpty(String)
 }
-
-#endif
 
 #if os(macOS)
 /// Wrapper class that provides convenient AppAuth functionality with Google Services.

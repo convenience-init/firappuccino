@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
 	name: "Firappuccino",
-	platforms: [.iOS(.v14), .macOS(.v12), .watchOS(.v7)],
+	platforms: [.iOS(.v14), .macOS(.v12)],
 	products: [
 		
 		.library(

@@ -12,9 +12,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
 		// Configurate
 		
 		/// Configuration
-		let exampleAppConfig = Configuration(legacyFPN: true, legacyAPIKey: ExampleAppConstants.legacyMessagingAPIKey, imagePath: ExampleAppConstants.imagePath, iss: ExampleAppConstants.iss, projectName: ExampleAppConstants.projectID, privateKey: ExampleAppConstants.privateKeyPath, publicKey: ExampleAppConstants.publicKeyPath, gcmIdKey: ExampleAppConstants.gcmMessageIDKey, clientID: ExampleAppConstants.clientID, globalOverrideLogLevel: Logger.Level.error)
+		let appConfig = Configuration(
+			legacyFPN: true,
+			legacyAPIKey: ExampleAppConstants.shared.legacyMessagingServerKey,
+			imagePath: ExampleAppConstants.shared.messagingCustomImagePath,
+			iss: ExampleAppConstants.shared.iss,
+			projectName: ExampleAppConstants.shared.projectID!,
+			privateKey: ExampleAppConstants.shared.privateKeyPath,
+			publicKey: ExampleAppConstants.shared.publicKeyPath,
+			gcmIdKey: ExampleAppConstants.shared.gcmMessageIDKey!,
+			clientID: ExampleAppConstants.shared.clientID!,
+			globalOverrideLogLevel: Logger.Level.error
+		)
 		
-		Configurator.configurate(configuration: exampleAppConfig)
+		Configurator.configurate(configuration: appConfig)
+		
 		
 		// for debug
 //		UserDefaults.standard.set(false, forKey: AppConstants.userDefaults.didWalkThroughKey)

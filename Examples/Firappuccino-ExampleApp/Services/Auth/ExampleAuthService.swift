@@ -44,7 +44,7 @@ final class ExampleAuthService: ObservableObject {
 				
 			case .signInWithGoogle:
 				do {
-					try await FAuth.signInWithGoogle(clientID: ExampleAppConstants.clientID)
+					try await FAuth.signInWithGoogle(clientID: ExampleAppConstants.shared.clientID!)
 					self.isAuthenticating = false
 				}
 				catch let error as NSError {

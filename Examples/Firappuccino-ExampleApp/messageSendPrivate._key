@@ -1,0 +1,7 @@
+Bag Attributes
+    friendlyName: privateKey
+    localKeyID: YOUR_LOCAL_KEY_ID 
+Key Attributes: <No Attributes>
+-----BEGIN PRIVATE KEY-----
+
+-----END PRIVATE KEY-----

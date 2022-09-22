@@ -47,7 +47,7 @@ struct PageView<Page: View>: View {
 	}
 	
 	private func completeWalkThrough() {
-		UserDefaults.standard.setValue(true, forKey: ExampleAppConstants.userDefaults.didWalkThroughKey)
+		UserDefaults.standard.setValue(true, forKey: ExampleAppConstants.shared.didFinishWalkThroughKey!)
 		finished = true
 	}
 	
