@@ -43,7 +43,7 @@ public struct Configurator {
 	/// - Parameters:
 	///   - WithOptions: The FirebaseOptions, if any, to use in configuration
 	///   - globalOverrideLogLevel: An optional global override of the default `Logger.Level` for unified logging
-	public static func configurate(configuration: Configuration? = nil) {
+	public static func configurate(configuration: Configuration?) {
 		guard let configuration = configuration else {
 			return
 		}

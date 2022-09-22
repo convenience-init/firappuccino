@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>0000000000000-00000000000000000000000000000000.apps.googleusercontent.com</string>
+	<string>10095415638-e0o8v95buts4qagu6qqk9t2o5be0hqpn.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.0000000000000-00000000000000000000000000000000</string>
+	<string>com.googleusercontent.apps.10095415638-e0o8v95buts4qagu6qqk9t2o5be0hqpn</string>
 	<key>API_KEY</key>
-	<string>A00000000000000000-00000000000-000000000</string>
+	<string>AIzaSyBhoYnRt_pIQbEavlhtDWY3N171pl-to30</string>
 	<key>GCM_SENDER_ID</key>
-	<string>0000000000000</string>
+	<string>10095415638</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.firappuccino.AppStarterTemplate</string>
+	<string>com.firappuccino.Firappuccino-ExampleApp</string>
 	<key>PROJECT_ID</key>
-	<string>testapp-00000</string>
+	<string>hilarist-authentication</string>
 	<key>STORAGE_BUCKET</key>
-	<string>testapp-00000.appspot.com</string>
+	<string>hilarist-authentication.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,16 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>0:0000000000000:ios:0000000000000000</string>
+	<string>1:10095415638:ios:4aa5cc494103b3cc6986f7</string>
+	<key>ISS</key>
+	<string>firebase-adminsdk-3gswh@hilarist-authentication.iam.gserviceaccount.com</string>
+	<key>GCM_MESSAGE_ID_KEY</key>
+	<string>gcm.message_id</string>
+	<key>LEGACY_API_SERVER_KEY</key>
+	<string>AAAAAlm70VY:APA91bHReDsmGJIIO2eP1s7ss10mjOzhDGUb0fVIEENPW3s0twlrhhJ64mGSgwnqvLkHGk7BkJkLa9B1_IT6nsUBO58VjvbYTMQtvgrKOHvylFOqbigHOZjbRt2LNbUfoS1zvE1Zv6t4</string>
 	<key>DATABASE_URL</key>
-	<string>https://testapp-00000.firebaseio.com</string>
+	<string>https://hilarist-authentication.firebaseio.com</string>
+	<key>DID_WALKTHROUGH_KEY</key>
+	<string>didWalkThrough</string>
 </dict>
 </plist>
