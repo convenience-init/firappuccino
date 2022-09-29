@@ -165,7 +165,6 @@ public struct FPNSender: FPNSendable {
 	/// - Throws: An `NSError`
 	private static func getBearerToken() async throws -> String {
 		let jwt = try await createMessagingJWT()
-		var bearer = ""
 		let headers = ["Content-Type": "application/x-www-form-urlencoded"]
 		
 		let postData = NSMutableData(data: "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer".data(using: String.Encoding.utf8)!)
@@ -186,7 +185,7 @@ public struct FPNSender: FPNSendable {
 				if let jsonData = data {
 					if let jsonDataDict  = try JSONSerialization.jsonObject(with: jsonData, options: JSONSerialization.ReadingOptions.allowFragments) as? [String: AnyObject] {
 						print(jsonDataDict)
-						bearer = jsonDataDict["access_token"] as! String
+						self.bearerToken = jsonDataDict["access_token"] as! String
 					}
 				}
 			}
@@ -195,7 +194,7 @@ public struct FPNSender: FPNSendable {
 			}
 		}
 		dataTask.resume()
-		return bearer
+		return self.bearerToken
 	}
 	
 	

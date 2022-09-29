@@ -7,7 +7,7 @@ import AppKit
 import UIKit
 #endif
 
-public class LegacyFPNSender: FPNSendable {
+public final class LegacyFPNSender: FPNSendable {
 	/*
 	 The `FUser` recipient must have a `deviceToken` property available in their user object. The `deviceToken` is automatically generated upon login, uploaded to Firestore, and managed by `FPNManager`.
 	 
