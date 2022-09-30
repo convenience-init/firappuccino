@@ -6,24 +6,21 @@ import AppKit
 import UIKit
 #endif
 
-#if os(iOS)
-import UIKit
-#endif
-
 import Foundation
 import Firebase
 import FirebaseMessaging
 import UserNotifications
 
+
 public protocol FPNSendable {
 }
 
-public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
+public class FPNManager: UIApplication, FPNSendable, MessagingDelegate, UNUserNotificationCenterDelegate {
 	let userID: String
 
-	private let defaultSender: FPNSendable = LegacyFPNSender()
+	private let defaultSender: any FPNSendable = LegacyFPNSender()
 	
-	public var sender: FPNSendable {
+	public var sender: any FPNSendable {
 		let shouldUseLegacySender = Configurator.configuration?.legacyFPN
 		guard shouldUseLegacySender != nil else {
 			return defaultSender
@@ -38,8 +35,8 @@ public class FPNManager: NSObject, FPNSendable, MessagingDelegate, UNUserNotific
 		}
 	}
 	
-	public let v1Sender: FPNSendable = FPNSender()
-	public let legacySender: FPNSendable = LegacyFPNSender()
+	public let v1Sender: any FPNSendable = FPNSender()
+	public let legacySender: any FPNSendable = LegacyFPNSender()
 	
 	public init(userID: String) {
 		self.userID = userID
